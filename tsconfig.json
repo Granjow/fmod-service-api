@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": true,
+    "inlineSourceMap": true,
+    "declaration": true,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "target": "es6",
+    "strict": true,
+    "jsx": "preserve",
+    "lib": [
+      "es2018",
+      "esnext"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "doc/**/*",
+    "spec/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/public/**/*"
+  ],
+  "jest": {
+    "clearMocks": true,
+    "collectCoverage": true,
+    "coverageDirectory": ".coverage",
+    "roots": [
+      "dist/"
+    ],
+    "testEnvironment": "node"
+  }
+}

@@ -24,7 +24,7 @@ export class FmodZeromqApi implements IControlFmod {
     async connect(): Promise<void> {
         this._socket = new zmq.Request();
         this._socket.connect( this._zmqAddress );
-        this.pollForRestart();
+        // this.pollForRestart();
     }
 
     disconnect(): void {
@@ -35,13 +35,13 @@ export class FmodZeromqApi implements IControlFmod {
 
     async start( event: string ): Promise<void> {
 
-        const command = `start:${event}`;
+        const command = `start-event:${event}`;
         await this.sendCommand( command );
     }
 
     async stop( event: string ): Promise<void> {
 
-        const command = `stop:${event}`;
+        const command = `stop-event:${event}`;
         await this.sendCommand( command );
     }
 

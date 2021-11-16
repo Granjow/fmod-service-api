@@ -8,4 +8,6 @@ export interface IControlFmod {
     stop( eventId: string ): Promise<void>;
 
     isPlaying( eventId: string ): Promise<boolean>;
+
+    setParameter( eventId: string, name: string, value: number ): Promise<void>;
 }

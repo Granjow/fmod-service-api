@@ -59,6 +59,12 @@ export class FmodZeromqApi implements IControlFmod {
         throw new Error( 'Method not implemented.' );
     }
 
+    async setParameter( eventId: string, name: string, value: number ): Promise<void> {
+        const command = `set-parameter:${eventId};${name};${value}`;
+        await this.sendCommand( command );
+    }
+
+
     async onReconnect(): Promise<void> {
         // TODO
         console.log( `FMOD server was (re)started, restoring events` );
@@ -102,6 +108,5 @@ export class FmodZeromqApi implements IControlFmod {
 
     private _socket: any | undefined;
     private readonly _zmqAddress: string;
-
 
 }

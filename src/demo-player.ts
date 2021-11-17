@@ -25,6 +25,10 @@ const run = async (): Promise<void> => {
     await new Promise( resolve => setTimeout( resolve, 2000 ) );
     await dp.uiCancel.play();
     await dp.musicLevel01.stinger.setValue( 1 );
+
+    await new Promise( resolve => setTimeout( resolve, 2000 ) );
+    await dp.musicLevel01.stop();
+    await dp.musicLevel02.start();
 };
 
 run().catch( err => console.error( err ) );

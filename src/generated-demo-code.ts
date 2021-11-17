@@ -9,14 +9,17 @@ export class FmodExample extends FmodPlayer {
     constructor( api: FmodZeromqApi, bankDir: string ) {
         super( api, bankDir );
         this.musicLevel01 = new MusicLevel01();
+        this.musicLevel02 = new MusicLevel02();
         this.uiCancel = new UiCancel();
         this.events.push( ...[
             this.musicLevel01,
+            this.musicLevel02,
             this.uiCancel,
         ] );
     }
 
     musicLevel01: MusicLevel01;
+    musicLevel02: MusicLevel02;
     uiCancel: UiCancel;
 }
 
@@ -54,6 +57,20 @@ class MusicLevel01 extends FmodEvent {
 
     stinger: Stinger;
     progression: Progression;
+}
+
+
+class MusicLevel02 extends FmodEvent {
+
+    constructor() {
+        super( 'Music/Level 02', 'Music' );
+        // Nothing to construct
+        this.params.push( ...[
+            // No Parameters
+        ] );
+    }
+
+    // No definitions
 }
 
 

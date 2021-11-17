@@ -13,6 +13,9 @@ const codegen = new FmodCodegen( [ {
                 labels: [ { value: 0, name: 'Intro' }, { value: 1, name: 'Main' } ]
             }
         ],
+    }, {
+        name: 'Music/Level 02',
+        params: [],
     } ],
 }, {
     bankName: 'SFX',

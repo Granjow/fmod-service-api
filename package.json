@@ -1,17 +1,25 @@
 {
-  "name": "fmod-service-api",
-  "version": "0.0.1",
+  "name": "@geheimgang188/fmod-service-api",
+  "version": "0.1.0",
   "description": "FMOD service API",
   "main": "index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/src/*",
+    "src/templates/*",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "tsc": "tsc",
     "lint": "eslint -c .eslintrc.js \"src/**\" \"spec/**\"",
-    "test": "jest"
+    "test": "jest",
+    "prepack": "rm -rf dist && npm run build",
+    "prepublishOnly": "npm run test"
   },
   "repository": {
     "type": "git",
-    "url": "git@git.granjow.net:escape/node-modules/fmod-service-api.git"
+    "url": "git@github.com:Granjow/fmod-service-api.git"
   },
   "keywords": [
     "fmod",

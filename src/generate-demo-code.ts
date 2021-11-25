@@ -22,4 +22,6 @@ const codegen = new FmodCodegen( [ {
     events: [ { name: 'UI/Cancel', params: [] } ]
 } ] );
 
-codegen.generateTo( 'FmodExample', path.join( __dirname, '../../src/generated-demo-code.ts' ) );
+codegen
+    .importFrom( './index' )
+    .generateTo( 'FmodExample', path.join( __dirname, '../../src/generated-demo-code.ts' ) );

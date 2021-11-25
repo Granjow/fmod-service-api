@@ -15,9 +15,19 @@ interface ClassData {
 
 export class FmodCodegen {
     private readonly _data: Bank[];
+    private _importFrom = 'fmod-service-api';
 
     constructor( data: Bank[] ) {
         this._data = data;
+    }
+
+    /**
+     * Overrides the default import location.
+     * @param path Defaults to the module name.
+     */
+    importFrom( path: string ): FmodCodegen {
+        this._importFrom = path;
+        return this;
     }
 
     generateTo( mainName: string, destPath: string ): void {
@@ -58,7 +68,7 @@ export class FmodCodegen {
 
     private generateIncludes(): string {
         return this.loadTemplate( 'includes' )
-            .replaceAll( '\'../', '\'./' );
+            .replaceAll( '\'../index\'', `'${this._importFrom}'` );
     }
 
     private generateMainCode( mainName: string, eventData: ClassData[] ): string {

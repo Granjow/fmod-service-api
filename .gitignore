@@ -4,3 +4,5 @@
 .idea/inspectionProfiles
 dist
 node_modules
+coverage
+*.tgz

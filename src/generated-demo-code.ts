@@ -1,5 +1,4 @@
-import { FmodZeromqApi } from './fmod-zeromq-api';
-import { ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from './fmod-types';
+import { FmodZeromqApi, ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from './index';
 
 
 export class FmodExample extends FmodPlayer {

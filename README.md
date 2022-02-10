@@ -22,4 +22,7 @@ await player.uiCancel.play();
   * Handle some umlauts (`ä` becomes `ae`) instead of removing them in class/variable names
   * In case the backend restarted for some reason, the API restores the events that were playing.
     (Rudimentary support only.)
+  * Add additional properties/parameters with the same name as in the FMOD project.
+    This can be used for automated access to the generated API based on the input data that was used
+    for generating the API.
 * **0.1.0:** Initial release

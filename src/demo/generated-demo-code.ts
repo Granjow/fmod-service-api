@@ -1,15 +1,18 @@
 import { FmodZeromqApi, ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from '../index';
 
 
-export class FmodExample extends FmodPlayer {
+export class TestProject extends FmodPlayer {
 
     events: FmodEvent[] = [];
 
     constructor( api: FmodZeromqApi, bankDir: string ) {
         super( api, bankDir );
         this.musicLevel01 = new MusicLevel01();
+        this['Music/Level 01'] = this.musicLevel01;
         this.musicUeberLevel02 = new MusicUeberLevel02();
+        this['Music/ÜberLevel 02'] = this.musicUeberLevel02;
         this.uiCancel = new UiCancel();
+        this['UI/Cancel'] = this.uiCancel;
         this.events.push( ...[
             this.musicLevel01,
             this.musicUeberLevel02,
@@ -18,8 +21,11 @@ export class FmodExample extends FmodPlayer {
     }
 
     musicLevel01: MusicLevel01;
+    'Music/Level 01': MusicLevel01;
     musicUeberLevel02: MusicUeberLevel02;
+    'Music/ÜberLevel 02': MusicUeberLevel02;
     uiCancel: UiCancel;
+    'UI/Cancel': UiCancel;
 }
 
 
@@ -48,7 +54,9 @@ class MusicLevel01 extends FmodEvent {
     constructor() {
         super( 'Music/Level 01', 'Music' );
         this.ueberStinger = new MusicLevel01UeberStinger();
+        this['ÜberStinger'] = this.ueberStinger;
         this.progression = new MusicLevel01Progression();
+        this['Progression'] = this.progression;
         this.params.push( ...[
             this.ueberStinger,
             this.progression,
@@ -56,7 +64,9 @@ class MusicLevel01 extends FmodEvent {
     }
 
     ueberStinger: MusicLevel01UeberStinger;
+    'ÜberStinger': MusicLevel01UeberStinger;
     progression: MusicLevel01Progression;
+    'Progression': MusicLevel01Progression;
 }
 
 
@@ -78,12 +88,14 @@ class MusicUeberLevel02 extends FmodEvent {
     constructor() {
         super( 'Music/ÜberLevel 02', 'Music' );
         this.progression = new MusicUeberLevel02Progression();
+        this['Progression'] = this.progression;
         this.params.push( ...[
             this.progression,
         ] );
     }
 
     progression: MusicUeberLevel02Progression;
+    'Progression': MusicUeberLevel02Progression;
 }
 
 

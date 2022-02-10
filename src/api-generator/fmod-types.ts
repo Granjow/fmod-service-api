@@ -100,6 +100,7 @@ export class FmodEvent {
     }
 
     async start(): Promise<void> {
+        // TODO Support restart from beginning
         await this.ensureBankLoaded();
         return this.api.start( this.id );
     }

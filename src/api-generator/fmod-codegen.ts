@@ -5,6 +5,7 @@ import { IFmodBank, IFmodEvent, IFmodParam, LabeledParam } from './interfaces/fm
 interface ClassData {
     className: string;
     memberName: string;
+    originalName: string;
     code: string;
 }
 
@@ -73,20 +74,27 @@ export class FmodCodegen {
         const s4 = this.createSpacer( 4 );
         const s8 = this.createSpacer( 8 );
         const s12 = this.createSpacer( 12 );
-        const eventDefs = eventData
-            .map( ( el, ix ) => `${s4( ix )}${el.memberName}: ${el.className};` )
-            .join( '\n' );
 
-        const eventInits = eventData
-            .map( ( el, ix ) => `${s8( ix )}this.${el.memberName} = new ${el.className}();` );
+        const eventDefinitions: string[] = [];
+        const eventInitialisation: string[] = [];
+
+        eventData.forEach( ( event, ix ) => {
+            eventDefinitions.push( `${s4( ix )}${event.memberName}: ${event.className};` );
+            eventInitialisation.push( `${s8( ix )}this.${event.memberName} = new ${event.className}();` );
+
+            if ( event.memberName !== event.originalName ) {
+                eventDefinitions.push( `${s4( 1 )}'${event.originalName}': ${event.className};` );
+                eventInitialisation.push( `${s8( 1 )}this['${event.originalName}'] = this.${event.memberName};` );
+            }
+        } );
 
         const eventList = eventData
             .map( ( el, ix ) => `${s12( ix )}this.${el.memberName},` );
 
         return this.loadTemplate( 'main', names )
-            .replace( '// EVENT_DEF', eventDefs )
+            .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// EVENT_LIST', eventList.join( '\n' ) )
-            .replace( '// CONSTRUCTOR', eventInits.join( '\n' ) );
+            .replace( '// CONSTRUCTOR', eventInitialisation.join( '\n' ) );
     }
 
     private generateEventCode( event: IFmodEvent, bank: IFmodBank, paramData: ClassData[] ): ClassData {
@@ -95,28 +103,34 @@ export class FmodCodegen {
         const s4 = this.createSpacer( 4 );
         const s8 = this.createSpacer( 8 );
         const s12 = this.createSpacer( 12 );
-        const paramDefs = paramData
-            .map( ( el, ix ) => `${s4( ix )}${el.memberName}: ${el.className};` )
-            .join( '\n' );
-        const constructor = paramData
-            .map( ( el, ix ) => `${s8( ix )}this.${el.memberName} = new ${el.className}();` )
-            .join( '\n' );
 
-        const paramList = paramData
-            .map( ( el, ix ) => `${s12( ix )}this.${el.memberName},` )
-            .join( '\n' );
+        const parameterDefinitions: string[] = [];
+        const parameterInitialisation: string[] = [];
+        const parameterList: string[] = [];
+
+        paramData.forEach( ( el, ix ) => {
+            parameterDefinitions.push( `${s4( ix )}${el.memberName}: ${el.className};` );
+            parameterInitialisation.push( `${s8( ix )}this.${el.memberName} = new ${el.className}();` );
+            parameterList.push( `${s12( ix )}this.${el.memberName},` );
+
+            if ( el.memberName !== el.originalName ) {
+                parameterDefinitions.push( `${s4( 1 )}'${el.originalName}': ${el.className};` );
+                parameterInitialisation.push( `${s8( 1 )}this['${el.originalName}'] = this.${el.memberName};` );
+            }
+        } );
 
         const useOrDefault = ( text: string, defaultValue: string ): string => text.length > 0 ? text : defaultValue;
 
         const code = this.loadTemplate( 'event', names )
             .replace( 'EVENT_NAME', `${event.name}` )
             .replace( 'BANK_NAME', `${bank.bankName}` )
-            .replace( '// PARAM_LIST', useOrDefault( paramList, '// No Parameters' ) )
-            .replace( '// PARAM_DEF', useOrDefault( paramDefs, '// No definitions' ) )
-            .replace( '// CONSTRUCTOR', useOrDefault( constructor, '// Nothing to construct' ) );
+            .replace( '// PARAM_LIST', useOrDefault( parameterList.join( '\n' ), '// No Parameters' ) )
+            .replace( '// PARAM_DEF', useOrDefault( parameterDefinitions.join( '\n' ), '// No definitions' ) )
+            .replace( '// CONSTRUCTOR', useOrDefault( parameterInitialisation.join( '\n' ), '// Nothing to construct' ) );
 
         return {
             code,
+            originalName: event.name,
             className: names.className,
             memberName: names.memberName,
         };
@@ -153,6 +167,7 @@ export class FmodCodegen {
 
         return {
             code,
+            originalName: param.name,
             className: names.className,
             memberName: names.memberName,
         };
@@ -184,6 +199,13 @@ export class FmodCodegen {
         return data;
     }
 
+    /**
+     * Creates a spacer function for the given indent. The spacer function takes one argument;
+     * if it is > 0, the indent is not added, otherwise it is.
+     *
+     * This is used for replacing in templates where the search string is usually already indented,
+     * so only the following lines need indentation.
+     */
     private createSpacer( length: number ): ( n: number ) => string {
         return ( ix: number ): string => ix > 0 ? new Array( length ).fill( ' ' ).join( '' ) : '';
     }

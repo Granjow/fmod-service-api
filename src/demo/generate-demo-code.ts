@@ -1,31 +1,11 @@
 import { FmodCodegen } from '../api-generator/fmod-codegen';
 import path from 'path';
+import { sampleProjectData, testBankData } from './test-data';
 
-const codegen = new FmodCodegen( [ {
-    bankName: 'Music',
-    events: [ {
-        name: 'Music/Level 01',
-        params: [
-            { name: 'ÜberStinger', type: 'continuous', min: 0, max: 1 },
-            {
-                name: 'Progression',
-                type: 'labeled',
-                labels: [ { value: 0, name: 'Intro' }, { value: 1, name: 'Main' } ]
-            }
-        ],
-    }, {
-        name: 'Music/ÜberLevel 02',
-        params: [ {
-            name: 'Progression',
-            type: 'labeled',
-            labels: [ { value: 0, name: 'Intro' }, { value: 1, name: 'Äxtra' } ]
-        } ],
-    } ],
-}, {
-    bankName: 'SFX',
-    events: [ { name: 'UI/Cancel', params: [] } ]
-} ] );
-
-codegen
+new FmodCodegen( testBankData )
     .importFrom( '../index' )
-    .generateTo( 'FmodExample', path.join( __dirname, '../../../src/demo/generated-demo-code.ts' ) );
+    .generateTo( 'TestProject', path.join( __dirname, '../../../src/demo/generated-demo-code.ts' ) );
+
+new FmodCodegen( sampleProjectData )
+    .importFrom( '../index' )
+    .generateTo( 'FmodSampleProject', path.join( __dirname, '../../../src/demo/fmod-sample-project.ts' ) );

@@ -1,4 +1,4 @@
-import { FmodEvent } from '../fmod-types';
+import { FmodEvent } from '../../index';
 
 // begin-template
 class CLASSNAME extends FmodEvent {

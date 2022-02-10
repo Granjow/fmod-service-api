@@ -1,5 +1,4 @@
-import { FmodZeromqApi } from '../fmod-zeromq-api';
-import { FmodEvent, FmodPlayer } from '../fmod-types';
+import { FmodEvent, FmodPlayer, FmodZeromqApi } from '../../index';
 
 // begin-template
 

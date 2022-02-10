@@ -1,5 +1,5 @@
 import Timer = NodeJS.Timer;
-import { IControlFmod } from './ports/i-control-fmod';
+import { IControlFmod } from '../ports/i-control-fmod';
 
 const zmq = require( 'zeromq' );
 
@@ -33,18 +33,30 @@ export class FmodZeromqApi implements IControlFmod {
         this._poll = undefined;
     }
 
+    /**
+     * Start an event; it can be stopped again
+     * @param event
+     */
     async start( event: string ): Promise<void> {
-
         const command = `start-event:${event}`;
+        this._runningEvents.add( event );
         await this.sendCommand( command );
     }
 
+    /**
+     * Stop a running event
+     * @param event
+     */
     async stop( event: string ): Promise<void> {
-
         const command = `stop-event:${event}`;
+        this._runningEvents.delete( event );
         await this.sendCommand( command );
     }
 
+    /**
+     * Play an event (fire-and-forget)
+     * @param event
+     */
     async play( event: string ): Promise<void> {
         const command = `play-event:${event}`;
         await this.sendCommand( command );
@@ -66,11 +78,15 @@ export class FmodZeromqApi implements IControlFmod {
 
 
     async onReconnect(): Promise<void> {
-        // TODO
         console.log( `FMOD server was (re)started, restoring events` );
+        for ( const runningEvent of this._runningEvents ) {
+            await this.start( runningEvent );
+        }
     }
 
     private async sendCommand( command: string ): Promise<string> {
+        if ( this._socket === undefined ) throw new Error( `Socket not initialised; did you call init()?` );
+
         console.log( `Sending: ${command}` );
         await this._socket.send( command );
 
@@ -108,5 +124,7 @@ export class FmodZeromqApi implements IControlFmod {
 
     private _socket: any | undefined;
     private readonly _zmqAddress: string;
+
+    private readonly _runningEvents: Set<string> = new Set();
 
 }

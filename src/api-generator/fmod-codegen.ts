@@ -1,11 +1,6 @@
 import * as fs from 'fs';
-import { Bank, Event, LabeledParam, Param } from './fmod-types';
-import camelcase from 'camelcase';
-
-interface CodeNames {
-    className: string;
-    memberName: string;
-}
+import { CodeNames, NamingTools } from './naming-tools';
+import { IFmodBank, IFmodEvent, IFmodParam, LabeledParam } from './interfaces/fmod-interfaces';
 
 interface ClassData {
     className: string;
@@ -14,10 +9,10 @@ interface ClassData {
 }
 
 export class FmodCodegen {
-    private readonly _data: Bank[];
-    private _importFrom = 'fmod-service-api';
+    private readonly _data: IFmodBank[];
+    private _importFrom = '@geheimgang188/fmod-service-api';
 
-    constructor( data: Bank[] ) {
+    constructor( data: IFmodBank[] ) {
         this._data = data;
     }
 
@@ -32,6 +27,7 @@ export class FmodCodegen {
 
     generateTo( mainName: string, destPath: string ): void {
         const code = this.generate( mainName );
+        console.log( `Writing generated API to ${destPath}` );
         fs.writeFileSync( destPath, code );
     }
 
@@ -68,11 +64,11 @@ export class FmodCodegen {
 
     private generateIncludes(): string {
         return this.loadTemplate( 'includes' )
-            .replaceAll( '\'../index\'', `'${this._importFrom}'` );
+            .replaceAll( '\'../../index\'', `'${this._importFrom}'` );
     }
 
     private generateMainCode( mainName: string, eventData: ClassData[] ): string {
-        const names = FmodCodegen.generateClassNames( mainName );
+        const names = NamingTools.generateClassNames( mainName );
 
         const s4 = this.createSpacer( 4 );
         const s8 = this.createSpacer( 8 );
@@ -93,8 +89,8 @@ export class FmodCodegen {
             .replace( '// CONSTRUCTOR', eventInits.join( '\n' ) );
     }
 
-    private generateEventCode( event: Event, bank: Bank, paramData: ClassData[] ): ClassData {
-        const names = FmodCodegen.generateClassNames( event.name );
+    private generateEventCode( event: IFmodEvent, bank: IFmodBank, paramData: ClassData[] ): ClassData {
+        const names = NamingTools.generateClassNames( event.name );
 
         const s4 = this.createSpacer( 4 );
         const s8 = this.createSpacer( 8 );
@@ -127,8 +123,8 @@ export class FmodCodegen {
     }
 
 
-    private generateParamCode( param: Param, event: Event ): ClassData {
-        const names = FmodCodegen.generateClassNames( param.name );
+    private generateParamCode( param: IFmodParam, event: IFmodEvent ): ClassData {
+        const names = NamingTools.generateClassNames( param.name, event.name );
 
         let templateName: string;
         switch ( param.type ) {
@@ -162,22 +158,8 @@ export class FmodCodegen {
         };
     }
 
-    private static generateClassNames( name: string ): CodeNames {
-        const dashedName = name
-            .replaceAll( /[^a-zA-Z0-9]/g, '_' )
-            .replace( /^[^a-zA-Z]/, 'xx' );
-
-        const memberName = camelcase( dashedName, { pascalCase: false } );
-        const className = camelcase( dashedName, { pascalCase: true } );
-
-        return {
-            className,
-            memberName,
-        };
-    }
-
     private loadTemplate( name: string, names?: CodeNames ): string {
-        const rawTemplate = fs.readFileSync( __dirname + `/../../src/templates/${name}.template.ts`, { encoding: 'utf-8' } );
+        const rawTemplate = fs.readFileSync( __dirname + `/../../../src/api-generator/templates/${name}.template.ts`, { encoding: 'utf-8' } );
         const lines = rawTemplate.split( '\n' );
 
         let include = false;

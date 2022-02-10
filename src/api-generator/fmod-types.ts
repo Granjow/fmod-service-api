@@ -1,5 +1,5 @@
-import { IBank } from './ports/i-manage-events';
-import { FmodZeromqApi } from './fmod-zeromq-api';
+import { IBank } from '../ports/i-manage-events';
+import { FmodZeromqApi } from '../api/fmod-zeromq-api';
 
 export interface IRequireBank {
     ensureBankLoaded( bankName: string ): Promise<void>;
@@ -131,37 +131,6 @@ export class FmodParameter {
     }
 }
 
-export interface Param {
-    name: string;
-    type: 'continuous' | 'labeled';
-}
-
-export interface ContinuousParam extends Param {
-    type: 'continuous';
-    min: number;
-    max: number;
-}
-
-export interface ParamLabel {
-    name: string;
-    value: number;
-}
-
-export interface LabeledParam extends Param {
-    type: 'labeled';
-    labels: ParamLabel[];
-}
-
-export interface Event {
-    name: string;
-    params: ( ContinuousParam | LabeledParam )[];
-}
-
-export interface Bank {
-    bankName: string;
-    events: Event[];
-}
-
 export class ContinuousParameter extends FmodParameter {
     constructor( parameterName: string, eventId: string ) {
         super( parameterName, eventId );
@@ -169,11 +138,15 @@ export class ContinuousParameter extends FmodParameter {
 }
 
 export class LabeledParameter<TLabel extends string> extends FmodParameter {
-    constructor( parameterName: string, eventId: string ) {
+
+    private readonly _labels: Record<TLabel, number>;
+
+    constructor( parameterName: string, eventId: string, labels: Record<TLabel, number> ) {
         super( parameterName, eventId );
+        this._labels = labels;
     }
 
     setLabel( label: TLabel ): Promise<void> {
-        return this.setValue( 0 );
+        return this.setValue( this._labels[ label ] );
     }
 }

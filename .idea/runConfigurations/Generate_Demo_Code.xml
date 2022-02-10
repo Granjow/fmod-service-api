@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Generate Demo Code" type="NodeJSConfigurationType" path-to-js-file="generate-demo-code.js" working-dir="$PROJECT_DIR$/dist/src/demo">
+    <method v="2" />
+  </configuration>
+</component>

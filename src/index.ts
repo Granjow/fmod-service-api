@@ -1,5 +1,5 @@
-export { FmodCodegen } from './fmod-codegen';
+export { FmodCodegen } from './api-generator/fmod-codegen';
 
-export { FmodZeromqApi } from './fmod-zeromq-api';
+export { FmodZeromqApi } from './api/fmod-zeromq-api';
 
-export * from './fmod-types';
+export * from './api-generator/fmod-types';

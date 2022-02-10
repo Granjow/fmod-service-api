@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Demo Player" type="NodeJSConfigurationType" path-to-js-file="demo-player.js" working-dir="$PROJECT_DIR$/dist/src/demo">
+    <method v="2" />
+  </configuration>
+</component>

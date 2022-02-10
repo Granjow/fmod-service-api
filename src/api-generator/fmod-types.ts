@@ -27,41 +27,6 @@ export class FmodBank implements IBank {
 
 }
 
-export abstract class FmodPlayer implements IRequireBank {
-    protected readonly _banks: FmodBank;
-    protected readonly _api: FmodZeromqApi;
-
-    abstract readonly events: FmodEvent[];
-
-    private readonly _loadedBanks: Set<string> = new Set();
-
-    protected constructor( api: FmodZeromqApi, bankDir: string ) {
-        this._api = api;
-        this._banks = new FmodBank( bankDir );
-    }
-
-    async init(): Promise<void> {
-        console.log( 'Initialising FMOD Player' );
-        for ( const event of this.events ) {
-            event.init( this._api, this );
-        }
-
-        console.log( 'Connecting to FMOD and loading banks' );
-        await this._api.connect();
-        await this._api.loadBank( this._banks.masterBankPath );
-        await this._api.loadBank( this._banks.masterStringsBankPath );
-    }
-
-    async ensureBankLoaded( bankName: string ): Promise<void> {
-        if ( this._loadedBanks.has( bankName ) ) {
-            return;
-        }
-        console.log( `Bank ${bankName} not loaded, loading now` );
-        await this._api.loadBank( this._banks.bankPath( bankName ) );
-        this._loadedBanks.add( bankName );
-    }
-}
-
 export class FmodEvent {
     public readonly id: string
     public readonly bankName: string;

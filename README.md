@@ -15,14 +15,14 @@ await player.uiCancel.play();
 
 ## Changelog
 
-* **0.2.0** (2022-02-10)
+* **1.0.0** (2022-02-10)
   * Fix package.json to point to the correct `index.js` file
   * Fix name clashes when parameters from different events have the same name
   * Fix sending values of labeled parameters
+  * Track connection status. `connect()` now returns immediately and a `connect` event is emitted on connection.
   * Handle some umlauts (`ä` becomes `ae`) instead of removing them in class/variable names
-  * In case the backend restarted for some reason, the API restores the events that were playing.
-    (Rudimentary support only.)
   * Add additional properties/parameters with the same name as in the FMOD project.
     This can be used for automated access to the generated API based on the input data that was used
     for generating the API.
+  * Use a user-provided logger (like `pino`) to log messages instead of `console.log`
 * **0.1.0** (2021-11-25) Initial release

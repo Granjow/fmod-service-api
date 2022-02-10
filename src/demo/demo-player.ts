@@ -8,8 +8,7 @@ const parentDir = `${os.homedir()}/Documents/FMOD Studio/examples/Build/Desktop/
 
 const dp = new FmodSampleProject( api, parentDir );
 
-const run = async (): Promise<void> => {
-    await dp.init();
+dp.on( 'init', async () => {
     await dp.musicLevel01.start();
     await dp.uiCancel.play();
 
@@ -30,6 +29,10 @@ const run = async (): Promise<void> => {
     await new Promise( resolve => setTimeout( resolve, 2000 ) );
     await dp.musicLevel01.stop();
     await dp.musicLevel02.start();
+} );
+
+const run = async (): Promise<void> => {
+    await dp.init();
 };
 
 run().catch( err => console.error( err ) );

@@ -1,36 +1,97 @@
 import Timer = NodeJS.Timer;
 import { IControlFmod } from '../ports/i-control-fmod';
+import * as zmq from 'zeromq';
+import { TypedEmitter } from 'tiny-typed-emitter';
+import { SmallStateMachine } from 'small-state-machine';
+import Semaphore from 'semaphore-promise';
+import { ILogger } from './i-logger';
 
-const zmq = require( 'zeromq' );
+export interface FmodZeromqApiEvents {
+    'connect': () => void;
+    'disconnect': () => void;
+    'reconnect': () => void;
+}
 
-export class FmodZeromqApi implements IControlFmod {
+export enum ConnectionState {
+    Disconnected = 'Disconnected',
+    Connecting = 'Connecting',
+    Connected = 'Connected',
+    Disconnecting = 'Disconnecting',
+}
 
-    constructor( address: string ) {
+enum Events {
+    connect = 'connect',
+    connected = 'connected',
+    disconnect = 'disconnect',
+    disconnected = 'disconnected',
+}
+
+export interface FmodZeromqApiArgs {
+    logger?: ILogger;
+    heartbeatIntervalMillis?: number;
+    socketStatusIntervalMillis?: number;
+}
+
+export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements IControlFmod {
+
+    private readonly _socketStatusInterval: number;
+    private _socketStatusPoll: Timer | undefined;
+
+    private readonly _heartbeatInterval: number;
+    private _heartbeatPoll: Timer | undefined;
+    private _lastId: string | undefined;
+
+    private _socket: zmq.Request | undefined;
+    private readonly _zmqAddress: string;
+
+    private readonly _logger: ILogger | undefined;
+    private readonly _sm: SmallStateMachine<ConnectionState, Events>;
+    private readonly _runningEvents: Set<string> = new Set();
+    private readonly _socketSempahore: Semaphore;
+
+    constructor( address: string, args?: FmodZeromqApiArgs ) {
+        super();
+
+        this._logger = args?.logger;
         this._zmqAddress = address;
+        this._heartbeatInterval = args?.heartbeatIntervalMillis ?? 4000;
+        this._socketStatusInterval = args?.socketStatusIntervalMillis ?? 4000;
+        this._socketSempahore = new Semaphore( 1 );
+
+        this._sm = new SmallStateMachine<ConnectionState, Events>( ConnectionState.Disconnected );
+        this._sm.configure( ConnectionState.Disconnected )
+            .onEntry( () => this.onDisconnected() )
+            .permit( Events.connect, ConnectionState.Connecting ) // Manually calling connect()
+            .permit( Events.connected, ConnectionState.Connected ) // Socket became available again
+            .ignore( Events.disconnected );
+        this._sm.configure( ConnectionState.Connecting )
+            .onEntry( () => this.onConnecting() )
+            .permit( Events.connected, ConnectionState.Connected )
+            .permit( Events.disconnected, ConnectionState.Disconnected )
+            .ignore( Events.connect );
+        this._sm.configure( ConnectionState.Connected )
+            .onEntry( () => this.onConnected() )
+            .permit( Events.disconnected, ConnectionState.Disconnected )
+            .ignore( Events.connect )
+            .ignore( Events.connected );
+        this._sm.configure( ConnectionState.Disconnecting )
+            .onEntry( () => this.onDisconnecting() )
+            .permit( Events.disconnected, ConnectionState.Disconnected )
+            .ignore( Events.disconnect );
+
+        this._sm.onStateChange( newState => this._logger?.debug( `Now in state ${newState}` ) );
     }
 
-    pollForRestart(): void {
-        if ( !this._poll ) {
-            this._poll = setInterval( () => this.checkFmodStatus().catch( console.error.bind( console ) ), 5000 );
-            this.checkFmodStatus()
-                .catch( console.error.bind( console ) );
-        }
+    get connectionState(): ConnectionState {
+        return this._sm.currentState;
     }
 
-    get alive(): boolean {
-        return this._alive;
-    }
-
-    async connect(): Promise<void> {
-        this._socket = new zmq.Request();
-        this._socket.connect( this._zmqAddress );
-        // this.pollForRestart();
+    connect(): void {
+        this._sm.fire( Events.connect );
     }
 
     disconnect(): void {
-        this._socket.disconnect( this._zmqAddress );
-        if ( this._poll !== undefined ) clearInterval( this._poll );
-        this._poll = undefined;
+        this._sm.fire( Events.disconnected );
     }
 
     /**
@@ -77,54 +138,109 @@ export class FmodZeromqApi implements IControlFmod {
     }
 
 
-    async onReconnect(): Promise<void> {
-        console.log( `FMOD server was (re)started, restoring events` );
-        for ( const runningEvent of this._runningEvents ) {
-            await this.start( runningEvent );
+    private doConnect(): void {
+        if ( this._socket !== undefined ) throw new Error( 'Socket already exists!' );
+
+        this._socket = new zmq.Request();
+        this._socket.connect( this._zmqAddress );
+
+        // Regularly send message to the API to check if it is still online
+        if ( this._heartbeatPoll === undefined ) {
+            this._heartbeatPoll = setInterval( () => this.checkHeartbeat(), this._heartbeatInterval );
+        }
+
+        // Check if socket is writable; changes to false when it goes offline
+        if ( this._socketStatusPoll === undefined ) {
+
+            let lastWritableStatus = false;
+            // TODO When the socket is not available, the calls pile up and are sent all at once when the socket becomes available.
+            // Is there a better way? Not sending calls at all does not update socket.writable status …
+            this._socketStatusPoll = setInterval( () => {
+                if ( this._socket === undefined ) return;
+
+                this._logger?.debug( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
+                const writableStatus = this._socket.writable;
+                if ( writableStatus !== lastWritableStatus ) {
+                    lastWritableStatus = writableStatus;
+                    this._sm.fire( writableStatus ? Events.connected : Events.disconnected );
+                }
+
+            }, this._socketStatusInterval );
         }
     }
 
-    private async sendCommand( command: string ): Promise<string> {
+    private doDisconnect(): void {
+        if ( this._socket !== undefined ) {
+            this._socket.disconnect( this._zmqAddress );
+            this._socket = undefined;
+        }
+        if ( this._heartbeatPoll !== undefined ) {
+            clearInterval( this._heartbeatPoll );
+            this._heartbeatPoll = undefined;
+        }
+        if ( this._socketStatusPoll !== undefined ) {
+            clearInterval( this._socketStatusPoll );
+            this._socketStatusPoll = undefined;
+        }
+        this._sm.fire( Events.disconnected );
+    }
+
+    private async sendCommand( command: string, logCommands: boolean = true ): Promise<string> {
         if ( this._socket === undefined ) throw new Error( `Socket not initialised; did you call init()?` );
 
-        console.log( `Sending: ${command}` );
-        await this._socket.send( command );
+        let msg = '';
 
-        const [ msg ] = await this._socket.receive();
-        console.log( `Received: ${msg}` );
+        const release = await this._socketSempahore.acquire();
+        try {
+            logCommands && this._logger?.debug( `Sending: ${command}` );
+            await this._socket.send( command );
+
+            // TODO properly handle error responses
+            const [ response ] = await this._socket.receive();
+            logCommands && this._logger?.debug( `Received: ${response}` );
+            msg = response.toString( 'utf-8' );
+        } finally {
+            release();
+        }
 
         return msg;
     }
 
-    private async checkFmodStatus(): Promise<void> {
+    private async checkHeartbeat(): Promise<void> {
         try {
-            const id = await this.sendCommand( 'get:id' );
+            const id = await this.sendCommand( 'get:id', true );
 
             if ( this._lastId !== id ) {
-                await this.onReconnect();
-            }
-            this._lastId = id;
-            if ( !this._alive ) {
-                this._alive = true;
-                console.log( 'FMOD is online.' );
+                if ( this._lastId !== undefined ) {
+                    this.emit( 'reconnect' );
+                }
+                this._lastId = id;
             }
 
+            this._sm.fire( Events.connected );
+
         } catch ( err ) {
-            if ( this._alive ) {
-                console.error( 'FMOD has gone:', err );
-                this._alive = false;
+            if ( this._sm.currentState !== ConnectionState.Disconnected ) {
+                this._sm.fire( Events.disconnected );
+                this._logger?.warn( 'FMOD has gone:', err );
             }
         }
     }
 
-    private _alive: boolean = false;
+    private onConnecting(): void {
+        this.doConnect();
+    }
 
-    private _poll: Timer | undefined;
-    private _lastId: string | undefined;
+    private onConnected(): void {
+        this.emit( 'connect' );
+    }
 
-    private _socket: any | undefined;
-    private readonly _zmqAddress: string;
+    private onDisconnecting(): void {
+        this.doDisconnect();
+    }
 
-    private readonly _runningEvents: Set<string> = new Set();
+    private onDisconnected(): void {
+        this.emit( 'disconnect' );
+    }
 
 }

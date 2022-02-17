@@ -155,14 +155,19 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
             let lastWritableStatus = false;
             // TODO When the socket is not available, the calls pile up and are sent all at once when the socket becomes available.
             // Is there a better way? Not sending calls at all does not update socket.writable status …
-            this._socketStatusPoll = setInterval( () => {
+            this._socketStatusPoll = setInterval( async () => {
                 if ( this._socket === undefined ) return;
 
-                this._logger?.debug( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
-                const writableStatus = this._socket.writable;
-                if ( writableStatus !== lastWritableStatus ) {
-                    lastWritableStatus = writableStatus;
-                    this._sm.fire( writableStatus ? Events.connected : Events.disconnected );
+                const release = await this._socketSempahore.acquire();
+                try {
+                    this._logger?.debug( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
+                    const writableStatus = this._socket.writable;
+                    if ( writableStatus !== lastWritableStatus ) {
+                        lastWritableStatus = writableStatus;
+                        this._sm.fire( writableStatus ? Events.connected : Events.disconnected );
+                    }
+                } finally {
+                    release();
                 }
 
             }, this._socketStatusInterval );

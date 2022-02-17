@@ -15,6 +15,8 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **1.0.1** (2022-02-17)
+  * Fix socket status check which incorrectly caused disconnected state
 * **1.0.0** (2022-02-10)
   * Fix package.json to point to the correct `index.js` file
   * Fix name clashes when parameters from different events have the same name

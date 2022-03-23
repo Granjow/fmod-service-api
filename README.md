@@ -15,6 +15,10 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **1.1.0** (2022-03-23)
+  * FMOD player now treats reconnect signal correctly and marks all banks as unloaded.
+    When the FMOD service is restarted, events will therefore be loaded from the bank again.
+  * Custom logger (like e.g. `pino`) can be passed to the API.
 * **1.0.1** (2022-02-17)
   * Fix socket status check which incorrectly caused disconnected state
 * **1.0.0** (2022-02-10)

@@ -1,12 +1,13 @@
 import { FmodZeromqApi, ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from '../index';
+import { ILogger } from '../index';
 
 
 export class FmodSampleProject extends FmodPlayer {
 
     events: FmodEvent[] = [];
 
-    constructor( api: FmodZeromqApi, bankDir: string ) {
-        super( api, bankDir );
+    constructor( api: FmodZeromqApi, bankDir: string, logger?: ILogger ) {
+        super( api, bankDir, logger );
         this.musicLevel01 = new MusicLevel01();
         this['Music/Level 01'] = this.musicLevel01;
         this.musicLevel02 = new MusicLevel02();

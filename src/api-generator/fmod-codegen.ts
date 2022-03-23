@@ -65,7 +65,8 @@ export class FmodCodegen {
 
     private generateIncludes(): string {
         return this.loadTemplate( 'includes' )
-            .replaceAll( '\'../../index\'', `'${this._importFrom}'` );
+            .replaceAll( '\'../../index\'', `'${this._importFrom}'` )
+            .replaceAll( '\'../../api/i-logger\'', `'${this._importFrom}'` );
     }
 
     private generateMainCode( mainName: string, eventData: ClassData[] ): string {

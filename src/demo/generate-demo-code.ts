@@ -1,11 +1,11 @@
 import { FmodCodegen } from '../api-generator/fmod-codegen';
 import path from 'path';
-import { sampleProjectData, testBankData } from './test-data';
+import { sampleProject, testBankProject } from './test-data';
 
-new FmodCodegen( testBankData )
+new FmodCodegen( testBankProject )
     .importFrom( '../index' )
     .generateTo( 'TestProject', path.join( __dirname, '../../../src/demo/generated-demo-code.ts' ) );
 
-new FmodCodegen( sampleProjectData )
+new FmodCodegen( sampleProject )
     .importFrom( '../index' )
     .generateTo( 'FmodSampleProject', path.join( __dirname, '../../../src/demo/fmod-sample-project.ts' ) );

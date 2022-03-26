@@ -25,6 +25,14 @@ export class FmodBank implements IBank {
         return `${this._bankDir}/${bankName}.bank`;
     }
 
+    localisedBankName( bankName: string, languageCode: string ): string {
+        return `${bankName}_${languageCode}`;
+    }
+
+    localisedBankPath( bankName: string, languageCode: string ): string {
+        return `${this._bankDir}/${this.localisedBankName( bankName, languageCode )}.bank`;
+    }
+
 }
 
 export class FmodEvent {
@@ -62,6 +70,11 @@ export class FmodEvent {
     async play(): Promise<void> {
         await this.ensureBankLoaded();
         return this.api.play( this.id );
+    }
+
+    async playVoice( voiceKey: string ): Promise<void> {
+        await this.ensureBankLoaded();
+        return this.api.playVoice( this.id, voiceKey );
     }
 
     async start(): Promise<void> {

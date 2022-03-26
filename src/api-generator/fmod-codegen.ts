@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { CodeNames, NamingTools } from './naming-tools';
-import { IFmodBank, IFmodEvent, IFmodParam, LabeledParam } from './interfaces/fmod-interfaces';
+import { IFmodBank, IFmodEvent, IFmodParam, IFmodProject, LabeledParam } from './interfaces/fmod-interfaces';
 
 interface ClassData {
     className: string;
@@ -10,10 +10,10 @@ interface ClassData {
 }
 
 export class FmodCodegen {
-    private readonly _data: IFmodBank[];
+    private readonly _data: IFmodProject;
     private _importFrom = '@geheimgang188/fmod-service-api';
 
-    constructor( data: IFmodBank[] ) {
+    constructor( data: IFmodProject ) {
         this._data = data;
     }
 
@@ -37,7 +37,7 @@ export class FmodCodegen {
         const allData: ClassData[] = [];
         const eventData: ClassData[] = [];
 
-        for ( const bank of this._data ) {
+        for ( const bank of this._data.banks ) {
 
             for ( const event of bank.events ) {
                 const paramData: ClassData[] = [];
@@ -92,9 +92,24 @@ export class FmodCodegen {
         const eventList = eventData
             .map( ( el, ix ) => `${s12( ix )}this.${el.memberName},` );
 
+        let localise = '// (no localised banks)';
+        if ( this._data.localisation !== undefined ) {
+
+            const localisedBanks = this._data.banks
+                .filter( el => el.localised )
+                .map( el => `'${el.bankName}'` )
+                .join( ', ' );
+            const languages = this._data.localisation.languages
+                .map( el => `'${el}'` )
+                .join( ', ' );
+
+            localise = `this.configureLocalisation( [ ${localisedBanks} ], [ ${languages} ], '${this._data.localisation.defaultLanguage}' );`;
+        }
+
         return this.loadTemplate( 'main', names )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// EVENT_LIST', eventList.join( '\n' ) )
+            .replace( '// LOCALISE', localise )
             .replace( '// CONSTRUCTOR', eventInitialisation.join( '\n' ) );
     }
 

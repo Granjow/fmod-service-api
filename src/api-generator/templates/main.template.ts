@@ -13,6 +13,7 @@ export class CLASSNAME extends FmodPlayer {
         this.events.push( ...[
             // EVENT_LIST
         ] );
+        // LOCALISE
     }
 
     // EVENT_DEF

@@ -165,12 +165,12 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
             let lastWritableStatus = false;
             // TODO When the socket is not available, the calls pile up and are sent all at once when the socket becomes available.
             // Is there a better way? Not sending calls at all does not update socket.writable status …
-            this._socketStatusPoll = setInterval( async () => {
+            const checkConnection = async (): Promise<void> => {
                 if ( this._socket === undefined ) return;
 
                 const release = await this._socketSempahore.acquire();
                 try {
-                    this._logger?.debug( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
+                    this._logger?.trace( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
                     const writableStatus = this._socket.writable;
                     if ( writableStatus !== lastWritableStatus ) {
                         lastWritableStatus = writableStatus;
@@ -179,8 +179,10 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
                 } finally {
                     release();
                 }
+            };
 
-            }, this._socketStatusInterval );
+            this._socketStatusPoll = setInterval( checkConnection, this._socketStatusInterval );
+            setImmediate( checkConnection );
         }
     }
 
@@ -207,13 +209,16 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
 
         const release = await this._socketSempahore.acquire();
         try {
-            logCommands && this._logger?.debug( `Sending: ${command}` );
+            logCommands && this._logger?.trace( `Sending: ${command}` );
             await this._socket.send( command );
 
             // TODO properly handle error responses
             const [ response ] = await this._socket.receive();
-            logCommands && this._logger?.debug( `Received: ${response}` );
+            logCommands && this._logger?.trace( `Received: ${response}` );
             msg = response.toString( 'utf-8' );
+            if ( msg.startsWith( 'Error:' ) ) {
+                throw new Error( msg );
+            }
         } finally {
             release();
         }

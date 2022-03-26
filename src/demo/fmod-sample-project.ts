@@ -19,6 +19,7 @@ export class FmodSampleProject extends FmodPlayer {
             this.musicLevel02,
             this.uiCancel,
         ] );
+        // (no localisation)
     }
 
     musicLevel01: MusicLevel01;

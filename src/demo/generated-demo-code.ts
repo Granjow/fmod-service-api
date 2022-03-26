@@ -19,6 +19,7 @@ export class TestProject extends FmodPlayer {
             this.musicUeberLevel02,
             this.uiCancel,
         ] );
+        this.configureLocalisation( [ 'SFX' ], [ 'en', 'de' ], 'de' );
     }
 
     musicLevel01: MusicLevel01;

@@ -1,17 +1,17 @@
 import { FmodCodegen } from '../src';
-import { testBankData } from '../src/demo/test-data';
+import { testBankData, testBankProject } from '../src/demo/test-data';
 import * as ts from 'typescript';
 
 describe( 'Codegen', () => {
 
     it( 'generates API from test data', () => {
-        expect( () => new FmodCodegen( testBankData )
+        expect( () => new FmodCodegen( testBankProject )
             .importFrom( '../index' )
             .generate( 'TestProject' ) ).not.toThrow();
     } );
 
     it( 'compiles generated API code', () => {
-        const code = new FmodCodegen( testBankData )
+        const code = new FmodCodegen( testBankProject )
             .importFrom( '../index' )
             .generate( 'TestProject' );
 

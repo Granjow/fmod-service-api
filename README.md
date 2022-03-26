@@ -15,6 +15,8 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.0.0** (2020-03-26) – Breaking change; FmodCodegen constructor parameters have changed.
+  * Added: Code generator supports localisation and automatically loads/unloads banks depending on the language.
 * **1.2.0** (2022-03-26)
   * API: Support `unloadBank` and `playVoice` to play localised voice files
 * **1.1.0** (2022-03-23)

@@ -1,4 +1,4 @@
-import { IFmodBank } from '../api-generator/interfaces/fmod-interfaces';
+import { IFmodBank, IFmodProject } from '../api-generator/interfaces/fmod-interfaces';
 
 /**
  * Test data to test special cases
@@ -25,8 +25,17 @@ export const testBankData: IFmodBank[] = [ {
     } ],
 }, {
     bankName: 'SFX',
+    localised: true,
     events: [ { name: 'UI/Cancel', params: [] } ]
 } ];
+
+export const testBankProject: IFmodProject = {
+    banks: testBankData,
+    localisation: {
+        languages: [ 'en', 'de' ],
+        defaultLanguage: 'de',
+    },
+};
 
 /**
  * Handful of events from the FMOD-built-in sample project
@@ -52,3 +61,7 @@ export const sampleProjectData: IFmodBank[] = [ {
     bankName: 'SFX',
     events: [ { name: 'UI/Cancel', params: [] } ]
 } ];
+
+export const sampleProject: IFmodProject = {
+    banks: sampleProjectData,
+};

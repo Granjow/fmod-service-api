@@ -28,5 +28,16 @@ export interface IFmodEvent {
 
 export interface IFmodBank {
     bankName: string;
+    localised?: boolean;
     events: IFmodEvent[];
+}
+
+export interface ILocalisationData {
+    languages: string[];
+    defaultLanguage: string;
+}
+
+export interface IFmodProject {
+    localisation?: ILocalisationData;
+    banks: IFmodBank[];
 }

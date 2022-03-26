@@ -15,6 +15,8 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **1.2.0** (2022-03-26)
+  * API: Support `unloadBank` and `playVoice` to play localised voice files
 * **1.1.0** (2022-03-23)
   * FMOD player now treats reconnect signal correctly and marks all banks as unloaded.
     When the FMOD service is restarted, events will therefore be loaded from the bank again.

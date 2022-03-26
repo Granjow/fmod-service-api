@@ -128,12 +128,22 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
         await this.sendCommand( command );
     }
 
+    async unloadBank( bankName: string ): Promise<void> {
+        const command = `unload-bank:${bankName}`;
+        await this.sendCommand( command );
+    }
+
     isPlaying( eventId: string ): Promise<boolean> {
         throw new Error( 'Method not implemented.' );
     }
 
     async setParameter( eventId: string, name: string, value: number ): Promise<void> {
         const command = `set-parameter:${eventId};${name};${value}`;
+        await this.sendCommand( command );
+    }
+
+    async playVoice( eventId: string, key: string ): Promise<void> {
+        const command = `play-voice:${eventId};${key}`;
         await this.sendCommand( command );
     }
 

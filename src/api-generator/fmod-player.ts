@@ -60,17 +60,25 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
             await this._api.loadBank( this._banks.bankPath( bankToLoad ) );
         } catch ( err: any ) {
             if ( err?.message.indexOf( 'FMOD Exception 70' ) >= 0 ) {
-                // Fine
-                this._logger?.debug( `Bank ${bankName} is already loaded.` );
-            } else if ( this._localisedBanks.has( bankName ) && this._language !== undefined ) {
-                for ( const lang of Array.from( this._languages ).filter( el => el !== this._language ) ) {
-                    try {
-                        await this._api.unloadBank( this._banks.localisedBankName( bankName, lang ) );
-                    } catch ( err ) {
-                        this._logger?.warn( err );
+
+                if ( this._localisedBanks.has( bankName ) && this._language !== undefined ) {
+
+                    // When initialising, localised banks are loaded. If a localised bank is already loaded in the service,
+                    // we don't know which language was loaded, so try to unload all languages and then load the desired one.
+                    for ( const lang of Array.from( this._languages ) ) {
+                        try {
+                            await this._api.unloadBank( this._banks.localisedBankPath( bankName, lang ) );
+                        } catch ( err ) {
+                            this._logger?.warn( err );
+                        }
                     }
+                    await this._api.loadBank( this._banks.bankPath( bankToLoad ) );
+
+                } else {
+
+                    // No issue, bank is loaded already, nothing more to do.
+                    this._logger?.debug( `Bank ${bankName} is already loaded.` );
                 }
-                await this._api.loadBank( this._banks.bankPath( bankToLoad ) );
             }
         }
         this._loadedBanks.add( bankName );

@@ -78,10 +78,12 @@ export class FmodCodegen {
 
         const eventDefinitions: string[] = [];
         const eventInitialisation: string[] = [];
+        const eventRegistration: string[] = [];
 
         eventData.forEach( ( event, ix ) => {
             eventDefinitions.push( `${s4( ix )}${event.memberName}: ${event.className};` );
             eventInitialisation.push( `${s8( ix )}this.${event.memberName} = new ${event.className}();` );
+            eventRegistration.push( `${s8( 1 )}this.registerEvent( this.${event.memberName} );` );
 
             if ( event.memberName !== event.originalName ) {
                 eventDefinitions.push( `${s4( 1 )}'${event.originalName}': ${event.className};` );
@@ -106,11 +108,15 @@ export class FmodCodegen {
             localise = `this.configureLocalisation( [ ${localisedBanks} ], [ ${languages} ], '${this._data.localisation.defaultLanguage}' );`;
         }
 
+        const constructor = eventInitialisation
+            .concat( eventRegistration )
+            .join( '\n' );
+
         return this.loadTemplate( 'main', names )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// EVENT_LIST', eventList.join( '\n' ) )
             .replace( '// LOCALISE', localise )
-            .replace( '// CONSTRUCTOR', eventInitialisation.join( '\n' ) );
+            .replace( '// CONSTRUCTOR', constructor );
     }
 
     private generateEventCode( event: IFmodEvent, bank: IFmodBank, paramData: ClassData[] ): ClassData {

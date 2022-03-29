@@ -14,6 +14,9 @@ export class TestProject extends FmodPlayer {
         this['Music/ÜberLevel 02'] = this.musicUeberLevel02;
         this.uiCancel = new UiCancel();
         this['UI/Cancel'] = this.uiCancel;
+        this.registerEvent( this.musicLevel01 );
+        this.registerEvent( this.musicUeberLevel02 );
+        this.registerEvent( this.uiCancel );
         this.events.push( ...[
             this.musicLevel01,
             this.musicUeberLevel02,

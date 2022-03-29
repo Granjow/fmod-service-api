@@ -1,7 +1,8 @@
 import { FmodZeromqApi } from '../api/fmod-zeromq-api';
-import { FmodBank, FmodEvent, IRequireBank } from './fmod-types';
+import { FmodBank, FmodEvent } from './fmod-types';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ILogger } from '../api/i-logger';
+import { IRequireBank } from './ports/i-require-bank';
 
 
 export interface FmodPlayerEvents {
@@ -20,6 +21,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     private readonly _loadedBanks: Set<string> = new Set();
     private readonly _localisedBanks: Set<string> = new Set();
     private readonly _languages: Set<string> = new Set();
+    private readonly _eventsByName: Map<string, FmodEvent> = new Map();
 
     protected constructor( api: FmodZeromqApi, bankDir: string, logger?: ILogger ) {
         super();
@@ -143,6 +145,20 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
             }
         }
 
+    }
+
+    getEvent( eventName: string ): FmodEvent {
+        const event = this._eventsByName.get( eventName );
+        if ( event === undefined ) {
+            throw new Error( `Event ${eventName} is not registered.` );
+        }
+        return event;
+    }
+
+    protected registerEvent( event: FmodEvent ): void {
+        if ( this._eventsByName.has( event.eventName ) ) throw new Error( `Event ${event.eventName} is already registered.` );
+
+        this._eventsByName.set( event.eventName, event );
     }
 
     private async initBanks(): Promise<void> {

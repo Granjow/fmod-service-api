@@ -23,12 +23,15 @@ dp.on( 'init', async () => {
     await dp.musicLevel01.stinger.setValue( 1 );
 
     await new Promise( resolve => setTimeout( resolve, 2000 ) );
-    await dp.uiCancel.play();
+    await dp.getEvent( 'UI/Cancel' ).play();
     await dp.musicLevel01.stinger.setValue( 1 );
 
     await new Promise( resolve => setTimeout( resolve, 2000 ) );
     await dp.musicLevel01.stop();
     await dp.musicLevel02.start();
+
+    await new Promise( resolve => setTimeout( resolve, 5000 ) );
+    await dp.musicLevel02.stop();
 } );
 
 const run = async (): Promise<void> => {

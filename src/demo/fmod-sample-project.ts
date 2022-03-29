@@ -14,12 +14,15 @@ export class FmodSampleProject extends FmodPlayer {
         this['Music/Level 02'] = this.musicLevel02;
         this.uiCancel = new UiCancel();
         this['UI/Cancel'] = this.uiCancel;
+        this.registerEvent( this.musicLevel01 );
+        this.registerEvent( this.musicLevel02 );
+        this.registerEvent( this.uiCancel );
         this.events.push( ...[
             this.musicLevel01,
             this.musicLevel02,
             this.uiCancel,
         ] );
-        // (no localisation)
+        // (no localised banks)
     }
 
     musicLevel01: MusicLevel01;

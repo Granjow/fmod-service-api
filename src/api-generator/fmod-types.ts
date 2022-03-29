@@ -1,9 +1,7 @@
 import { IBank } from '../ports/i-manage-events';
 import { FmodZeromqApi } from '../api/fmod-zeromq-api';
+import { IRequireBank } from './ports/i-require-bank';
 
-export interface IRequireBank {
-    ensureBankLoaded( bankName: string ): Promise<void>;
-}
 
 export class FmodBank implements IBank {
 
@@ -37,6 +35,7 @@ export class FmodBank implements IBank {
 
 export class FmodEvent {
     public readonly id: string
+    public readonly eventName: string;
     public readonly bankName: string;
 
     private _api: FmodZeromqApi | undefined;
@@ -47,6 +46,7 @@ export class FmodEvent {
 
     constructor( name: string, bankName: string ) {
         this.id = `event:/${name}`;
+        this.eventName = name;
         this.bankName = bankName;
     }
 

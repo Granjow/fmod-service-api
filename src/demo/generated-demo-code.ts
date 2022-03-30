@@ -57,7 +57,7 @@ class MusicLevel01Progression extends LabeledParameter<keyof ( typeof MusicLevel
 class MusicLevel01 extends FmodEvent {
 
     constructor() {
-        super( 'Music/Level 01', 'Music' );
+        super( 'Music/Level 01', 'Music', [  ] );
         this.ueberStinger = new MusicLevel01UeberStinger();
         this['ÜberStinger'] = this.ueberStinger;
         this.progression = new MusicLevel01Progression();
@@ -91,7 +91,7 @@ class MusicUeberLevel02Progression extends LabeledParameter<keyof ( typeof Music
 class MusicUeberLevel02 extends FmodEvent {
 
     constructor() {
-        super( 'Music/ÜberLevel 02', 'Music' );
+        super( 'Music/ÜberLevel 02', 'Music', [  ] );
         this.progression = new MusicUeberLevel02Progression();
         this['Progression'] = this.progression;
         this.params.push( ...[
@@ -107,7 +107,7 @@ class MusicUeberLevel02 extends FmodEvent {
 class UiCancel extends FmodEvent {
 
     constructor() {
-        super( 'UI/Cancel', 'SFX' );
+        super( 'UI/Cancel', 'SFX', [  ] );
         // Nothing to construct
         this.params.push( ...[
             // No Parameters

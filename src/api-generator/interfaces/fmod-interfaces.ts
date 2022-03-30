@@ -24,6 +24,7 @@ export type FmodParamType = ContinuousParam | LabeledParam;
 export interface IFmodEvent {
     name: string;
     params: FmodParamType[];
+    requiresOtherBanks?: string[];
 }
 
 export interface IFmodBank {

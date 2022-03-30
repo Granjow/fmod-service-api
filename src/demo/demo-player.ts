@@ -12,9 +12,15 @@ dp.on( 'init', async () => {
     await dp.musicLevel01.start();
     await dp.uiCancel.play();
 
+
     await dp.musicLevel01.progression.setValue( 1 );
 
-    await new Promise( resolve => setTimeout( resolve, 15000 ) );
+    await dp.characterDialogue.playVoice( 'welcome' );
+    await new Promise( resolve => setTimeout( resolve, 5000 ) );
+    await dp.setLanguage( 'JP' );
+    await dp.characterDialogue.playVoice( 'welcome' );
+
+    await new Promise( resolve => setTimeout( resolve, 10000 ) );
     await dp.uiCancel.play();
     await dp.musicLevel01.stinger.setValue( 1 );
 

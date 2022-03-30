@@ -37,6 +37,7 @@ export class FmodEvent {
     public readonly id: string
     public readonly eventName: string;
     public readonly bankName: string;
+    public readonly additionalBankRequirements: string[];
 
     private _api: FmodZeromqApi | undefined;
     private _bankLoader: IRequireBank | undefined;
@@ -44,10 +45,11 @@ export class FmodEvent {
     // Add parameters which should be initialised here
     public readonly params: FmodParameter[] = [];
 
-    constructor( name: string, bankName: string ) {
+    constructor( name: string, bankName: string, additionalBankRequirements: string[] ) {
         this.id = `event:/${name}`;
         this.eventName = name;
         this.bankName = bankName;
+        this.additionalBankRequirements = additionalBankRequirements;
     }
 
     init( api: FmodZeromqApi, bankLoader: IRequireBank ): void {
@@ -87,10 +89,13 @@ export class FmodEvent {
         return this.api.stop( this.id );
     }
 
-    private ensureBankLoaded(): Promise<void> {
+    private async ensureBankLoaded(): Promise<void> {
         if ( this._bankLoader === undefined ) throw new Error( `Bank loader not initialised on event ${this.id}` );
 
-        return this._bankLoader.ensureBankLoaded( this.bankName );
+        await this._bankLoader.ensureBankLoaded( this.bankName );
+        for ( const additionalBank of this.additionalBankRequirements ) {
+            await this._bankLoader.ensureBankLoaded( additionalBank );
+        }
     }
 }
 

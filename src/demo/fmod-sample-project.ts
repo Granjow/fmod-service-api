@@ -14,15 +14,19 @@ export class FmodSampleProject extends FmodPlayer {
         this['Music/Level 02'] = this.musicLevel02;
         this.uiCancel = new UiCancel();
         this['UI/Cancel'] = this.uiCancel;
+        this.characterDialogue = new CharacterDialogue();
+        this['Character/Dialogue'] = this.characterDialogue;
         this.registerEvent( this.musicLevel01 );
         this.registerEvent( this.musicLevel02 );
         this.registerEvent( this.uiCancel );
+        this.registerEvent( this.characterDialogue );
         this.events.push( ...[
             this.musicLevel01,
             this.musicLevel02,
             this.uiCancel,
+            this.characterDialogue,
         ] );
-        // (no localised banks)
+        this.configureLocalisation( [ 'Dialogue' ], [ 'EN', 'JP', 'CN' ], 'EN' );
     }
 
     musicLevel01: MusicLevel01;
@@ -31,6 +35,8 @@ export class FmodSampleProject extends FmodPlayer {
     'Music/Level 02': MusicLevel02;
     uiCancel: UiCancel;
     'UI/Cancel': UiCancel;
+    characterDialogue: CharacterDialogue;
+    'Character/Dialogue': CharacterDialogue;
 }
 
 
@@ -57,7 +63,7 @@ class MusicLevel01Progression extends LabeledParameter<keyof ( typeof MusicLevel
 class MusicLevel01 extends FmodEvent {
 
     constructor() {
-        super( 'Music/Level 01', 'Music' );
+        super( 'Music/Level 01', 'Music', [  ] );
         this.stinger = new MusicLevel01Stinger();
         this['Stinger'] = this.stinger;
         this.progression = new MusicLevel01Progression();
@@ -85,7 +91,7 @@ export class MusicLevel02Area extends ContinuousParameter {
 class MusicLevel02 extends FmodEvent {
 
     constructor() {
-        super( 'Music/Level 02', 'Music' );
+        super( 'Music/Level 02', 'Music', [  ] );
         this.area = new MusicLevel02Area();
         this['Area'] = this.area;
         this.params.push( ...[
@@ -101,7 +107,21 @@ class MusicLevel02 extends FmodEvent {
 class UiCancel extends FmodEvent {
 
     constructor() {
-        super( 'UI/Cancel', 'SFX' );
+        super( 'UI/Cancel', 'SFX', [  ] );
+        // Nothing to construct
+        this.params.push( ...[
+            // No Parameters
+        ] );
+    }
+
+    // No definitions
+}
+
+
+class CharacterDialogue extends FmodEvent {
+
+    constructor() {
+        super( 'Character/Dialogue', 'SFX', [ 'Dialogue' ] );
         // Nothing to construct
         this.params.push( ...[
             // No Parameters

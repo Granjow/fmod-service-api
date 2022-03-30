@@ -146,6 +146,7 @@ export class FmodCodegen {
         const code = this.loadTemplate( 'event', names )
             .replace( 'EVENT_NAME', `${event.name}` )
             .replace( 'BANK_NAME', `${bank.bankName}` )
+            .replace( '\'ADDITIONAL_BANKS\'', `${event.requiresOtherBanks?.map( el => `'${el}'` ).join( ', ' ) ?? ''}` )
             .replace( '// PARAM_LIST', useOrDefault( parameterList.join( '\n' ), '// No Parameters' ) )
             .replace( '// PARAM_DEF', useOrDefault( parameterDefinitions.join( '\n' ), '// No definitions' ) )
             .replace( '// CONSTRUCTOR', useOrDefault( parameterInitialisation.join( '\n' ), '// Nothing to construct' ) );

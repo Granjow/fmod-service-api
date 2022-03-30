@@ -4,7 +4,7 @@ import { FmodEvent } from '../../index';
 class CLASSNAME extends FmodEvent {
 
     constructor() {
-        super( 'EVENT_NAME', 'BANK_NAME' );
+        super( 'EVENT_NAME', 'BANK_NAME', [ 'ADDITIONAL_BANKS' ] );
         // CONSTRUCTOR
         this.params.push( ...[
             // PARAM_LIST

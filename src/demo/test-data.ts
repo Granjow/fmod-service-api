@@ -59,9 +59,20 @@ export const sampleProjectData: IFmodBank[] = [ {
     } ],
 }, {
     bankName: 'SFX',
-    events: [ { name: 'UI/Cancel', params: [] } ]
+    events: [
+        { name: 'UI/Cancel', params: [] },
+        { name: 'Character/Dialogue', params: [], requiresOtherBanks: [ 'Dialogue' ] },
+    ]
+}, {
+    bankName: 'Dialogue',
+    localised: true,
+    events: [],
 } ];
 
 export const sampleProject: IFmodProject = {
     banks: sampleProjectData,
+    localisation: {
+        languages: [ 'EN', 'JP', 'CN' ],
+        defaultLanguage: 'EN',
+    }
 };

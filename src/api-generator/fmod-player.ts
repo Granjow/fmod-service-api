@@ -17,6 +17,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
 
     private _initCalled = false;
     private _language: string | undefined;
+    private _defaultLanguage: string | undefined;
     private readonly _logger: ILogger | undefined;
     private readonly _loadedBanks: Set<string> = new Set();
     private readonly _localisedBanks: Set<string> = new Set();
@@ -114,7 +115,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
 
         bankNames.forEach( ( bankName ) => this._localisedBanks.add( bankName ) );
         languages.forEach( language => this._languages.add( language ) );
-        this._language = currentLanguage;
+        this._defaultLanguage = currentLanguage;
     }
 
     /**
@@ -130,12 +131,10 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
 
             const banksToReload: string[] = [];
 
-            if ( this._language !== undefined ) {
-                for ( const bank of this._loadedBanks ) {
-                    if ( this._localisedBanks.has( bank ) ) {
-                        banksToReload.push( bank );
-                        await this.ensureBankUnloaded( bank, true );
-                    }
+            for ( const bank of this._loadedBanks ) {
+                if ( this._localisedBanks.has( bank ) ) {
+                    banksToReload.push( bank );
+                    await this.ensureBankUnloaded( bank, true );
                 }
             }
 
@@ -164,9 +163,11 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     private async initBanks(): Promise<void> {
         await this.ensureBankLoaded( 'Master' );
         await this.ensureBankLoaded( 'Master.strings' );
-        for ( const localisedBank of this._localisedBanks ) {
-            await this.ensureBankLoaded( localisedBank );
+
+        if ( this._defaultLanguage !== undefined ) {
+            await this.setLanguage( this._defaultLanguage );
         }
+
         this.emit( 'init' );
     }
 

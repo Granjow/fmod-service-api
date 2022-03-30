@@ -15,6 +15,10 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* Upcoming
+  * Fixed: Banks are correctly initialised when the FMOD Service has already loaded localised banks.
+  * Added: An event can specify additional banks (like dialogue banks with audio tables) which it requires.
+    They will also be auto-loaded when playing the event.
 * **2.1.0** (2020-03-29)
   * Added: Get events by name with `getEvent(eventName)`
 * **2.0.0** (2020-03-27) – Breaking change; FmodCodegen constructor parameters have changed.

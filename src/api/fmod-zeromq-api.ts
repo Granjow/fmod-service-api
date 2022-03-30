@@ -133,10 +133,6 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
         await this.sendCommand( command );
     }
 
-    isPlaying( eventId: string ): Promise<boolean> {
-        throw new Error( 'Method not implemented.' );
-    }
-
     async setParameter( eventId: string, name: string, value: number ): Promise<void> {
         const command = `set-parameter:${eventId};${name};${value}`;
         await this.sendCommand( command );
@@ -145,6 +141,19 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
     async playVoice( eventId: string, key: string ): Promise<void> {
         const command = `play-voice:${eventId};${key}`;
         await this.sendCommand( command );
+    }
+
+    isPlaying( eventId: string ): Promise<boolean> {
+        throw new Error( 'Method not implemented.' );
+    }
+
+    async listLoadedBankPaths(): Promise<string[]> {
+        const command = 'list-bank-paths';
+        const list = await this.sendCommand( command );
+        return list
+            .split( ';' )
+            .map( el => el.replace( /^bank:\//, '' ) )
+            .filter( el => el.length > 0 );
     }
 
 

@@ -11,7 +11,9 @@ export interface IControlFmod {
 
     playVoice( eventId: string, key: string ): Promise<void>;
 
+    setParameter( eventId: string, name: string, value: number ): Promise<void>;
+
     isPlaying( eventId: string ): Promise<boolean>;
 
-    setParameter( eventId: string, name: string, value: number ): Promise<void>;
+    listLoadedBankPaths(): Promise<string[]>;
 }

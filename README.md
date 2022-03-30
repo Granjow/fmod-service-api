@@ -15,6 +15,10 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.3.0** (2022-03-30) – requires FMOD service v1.0.0
+  * Added: A `reconnect` event is now fired when the player reconnects. `init` is only fired for the first connection.
+  * Changed: When initialising or reconnecting, the API first retrieves the loaded banks and only (re-)loads
+    those necessary (e.g. missing banks and localised banks).
 * **2.2.0** (2022-03-30)
   * Fixed: Banks are correctly initialised when the FMOD Service has already loaded localised banks.
   * Added: An event can specify additional banks (like dialogue banks with audio tables) which it requires.

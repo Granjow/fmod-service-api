@@ -18,6 +18,7 @@ describe( 'FMOD Player', () => {
             const api: FmodZeromqApi = {
                 loadBank: jest.fn().mockResolvedValue( undefined ),
                 unloadBank: jest.fn().mockResolvedValue( undefined ),
+                listLoadedBankPaths: jest.fn().mockResolvedValue( [] ),
                 // @ts-ignore
                 once: ( event: string, cb: () => void ) => {
                     if ( event === 'connect' && connected ) {
@@ -47,11 +48,12 @@ describe( 'FMOD Player', () => {
                 loadBank: jest.fn().mockResolvedValue( undefined ),
                 unloadBank: jest.fn().mockResolvedValue( undefined ),
                 connect: jest.fn().mockResolvedValue( undefined ),
+                listLoadedBankPaths: jest.fn().mockResolvedValue( [] ),
                 // @ts-ignore
                 once: ( event, cb ) => {
                     if ( event === 'connect' ) setImmediate( cb );
                 },
-                on:jest.fn(),
+                on: jest.fn(),
             };
 
             const player = new TestFmodPlayer( api );

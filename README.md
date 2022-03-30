@@ -15,13 +15,13 @@ await player.uiCancel.play();
 
 ## Changelog
 
-* Upcoming
+* **2.2.0** (2022-03-30)
   * Fixed: Banks are correctly initialised when the FMOD Service has already loaded localised banks.
   * Added: An event can specify additional banks (like dialogue banks with audio tables) which it requires.
     They will also be auto-loaded when playing the event.
-* **2.1.0** (2020-03-29)
+* **2.1.0** (2022-03-29)
   * Added: Get events by name with `getEvent(eventName)`
-* **2.0.0** (2020-03-27) – Breaking change; FmodCodegen constructor parameters have changed.
+* **2.0.0** (2022-03-27) – Breaking change; FmodCodegen constructor parameters have changed.
   * Added: Code generator supports localisation and automatically loads/unloads banks depending on the language.
 * **1.2.0** (2022-03-26)
   * API: Support `unloadBank` and `playVoice` to play localised voice files

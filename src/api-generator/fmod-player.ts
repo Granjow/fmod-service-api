@@ -1,8 +1,9 @@
 import { FmodZeromqApi } from '../api/fmod-zeromq-api';
-import { FmodBank, FmodEvent } from './fmod-types';
+import { FmodBank } from './fmod-types';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ILogger } from '../api/i-logger';
 import { IRequireBank } from './ports/i-require-bank';
+import { FmodEvent } from './fmod-event';
 
 
 export interface FmodPlayerEvents {

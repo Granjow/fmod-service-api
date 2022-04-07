@@ -66,6 +66,13 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         this._api.on( 'reconnect', () => this.handleReconnect() );
     }
 
+    /**
+     * Close the API connection.
+     */
+    close(): void {
+        this._api.disconnect();
+    }
+
     async ensureBankLoaded( bankName: string ): Promise<void> {
         if ( this._loadedBanksByName.has( bankName ) ) {
             return;

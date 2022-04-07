@@ -15,6 +15,8 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.4.0** (2022-04-07)
+  * Added: `FmodPlayer.close()` to disconnect the ZeroMQ socket
 * **2.3.0** (2022-03-30) – requires FMOD service v1.0.0
   * Added: A `reconnect` event is now fired when the player reconnects. `init` is only fired for the first connection.
   * Changed: When initialising or reconnecting, the API first retrieves the loaded banks and only (re-)loads

@@ -1,37 +1,41 @@
-import { FmodZeromqApi } from '../api/fmod-zeromq-api';
 import { IRequireBank } from './ports/i-require-bank';
 import { FmodParameter } from './fmod-types';
+import { IFmodApi } from '../ports/i-fmod-api';
+import { ILogger } from '../api/i-logger';
 
 export class FmodEvent {
-    public readonly id: string
+    public readonly id: string;
     public readonly eventName: string;
     public readonly bankName: string;
     public readonly additionalBankRequirements: string[];
 
-    private _api: FmodZeromqApi | undefined;
+    private readonly _logger: ILogger | undefined;
+
+    private _api: IFmodApi | undefined;
     private _bankLoader: IRequireBank | undefined;
 
     // Add parameters which should be initialised here
     public readonly params: FmodParameter[] = [];
 
-    constructor( name: string, bankName: string, additionalBankRequirements: string[] ) {
+    constructor( name: string, bankName: string, additionalBankRequirements: string[], logger?: ILogger ) {
         this.id = `event:/${name}`;
+        this._logger = logger;
         this.eventName = name;
         this.bankName = bankName;
         this.additionalBankRequirements = additionalBankRequirements;
     }
 
-    init( api: FmodZeromqApi, bankLoader: IRequireBank ): void {
-        console.log( `Initialising event ${this.id}` );
+    init( api: IFmodApi, bankLoader: IRequireBank ): void {
+        this._logger?.debug( `Initialising event ${this.id}` );
         this._api = api;
         this._bankLoader = bankLoader;
         for ( const param of this.params ) {
-            console.log( `- Initialising parameter ${param.name}` );
+            this._logger?.debug( `- Initialising parameter ${param.name}` );
             param.init( this.id, api );
         }
     }
 
-    get api(): FmodZeromqApi {
+    get api(): IFmodApi {
         if ( this._api === undefined ) {
             throw new Error( 'API not initialised yet.' );
         }

@@ -5,12 +5,8 @@ import { TypedEmitter } from 'tiny-typed-emitter';
 import { SmallStateMachine } from 'small-state-machine';
 import Semaphore from 'semaphore-promise';
 import { ILogger } from './i-logger';
+import { ConnectionEvents, IConnect, IConnectEvents } from '../ports/i-connect';
 
-export interface FmodZeromqApiEvents {
-    'connect': () => void;
-    'disconnect': () => void;
-    'reconnect': () => void;
-}
 
 export enum ConnectionState {
     Disconnected = 'Disconnected',
@@ -32,7 +28,7 @@ export interface FmodZeromqApiArgs {
     socketStatusIntervalMillis?: number;
 }
 
-export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements IControlFmod {
+export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents {
 
     private readonly _socketStatusInterval: number;
     private _socketStatusPoll: Timer | undefined;
@@ -161,7 +157,18 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
         if ( this._socket !== undefined ) throw new Error( 'Socket already exists!' );
 
         this._socket = new zmq.Request();
+
+        /*
+        // Connection timeouts may be helpful against calls piling up
+        this._socket.connectTimeout = 2000;
+        this._socket.sendTimeout = 200;
+        this._socket.receiveTimeout = 2000;
+         */
+
+        this._logger?.debug( `ZMQ socket connecting to ${this._zmqAddress}` );
         this._socket.connect( this._zmqAddress );
+
+        this._logger?.debug( `Setting up heartbeat and status polling` );
 
         // Regularly send message to the API to check if it is still online
         if ( this._heartbeatPoll === undefined ) {
@@ -196,6 +203,7 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
     }
 
     private doDisconnect(): void {
+        this._logger?.debug( 'Disconnecting …' );
         if ( this._socket !== undefined ) {
             this._socket.disconnect( this._zmqAddress );
             this._socket = undefined;
@@ -211,19 +219,28 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
         this._sm.fire( Events.disconnected );
     }
 
-    private async sendCommand( command: string, logCommands: boolean = true ): Promise<string> {
+    private async sendCommand( command: string ): Promise<string> {
         if ( this._socket === undefined ) throw new Error( `Socket not initialised; did you call init()?` );
 
         let msg = '';
 
         const release = await this._socketSempahore.acquire();
+        this._logger?.trace( `Sending: ${command}` );
         try {
-            logCommands && this._logger?.trace( `Sending: ${command}` );
-            await this._socket.send( command );
+            /*
+            // Setting the sending timeout may be helpful. Needs further examination.
+            this._logger?.info( `Send timeout is ${this._socket.sendTimeout}` );
+            this._socket.sendTimeout = 200;
+            this._logger?.info( `Send timeout set to ${this._socket.sendTimeout}` );
+             */
 
-            // TODO properly handle error responses
+            const sendPromise = this._socket.send( command );
+
+            this._logger?.info( `Writable: ${this._socket.writable}, closed: ${this._socket.closed}` );
+
             const [ response ] = await this._socket.receive();
-            logCommands && this._logger?.trace( `Received: ${response}` );
+            this._logger?.trace( `Received: ${response}` );
+
             msg = response.toString( 'utf-8' );
             if ( msg.startsWith( 'Error:' ) ) {
                 throw new Error( msg );
@@ -231,17 +248,18 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
         } finally {
             release();
         }
+        this._logger?.trace( `Done sending ${command}` );
 
         return msg;
     }
 
     private async checkHeartbeat(): Promise<void> {
         try {
-            const id = await this.sendCommand( 'get:id', true );
+            const id = await this.sendCommand( 'get:id' );
 
             if ( this._lastId !== id ) {
                 if ( this._lastId !== undefined ) {
-                    this.emit( 'reconnect' );
+                    process.nextTick( () => this.emit( 'reconnect' ) );
                 }
                 this._lastId = id;
             }
@@ -261,7 +279,7 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
     }
 
     private onConnected(): void {
-        this.emit( 'connect' );
+        process.nextTick( () => this.emit( 'connect' ) );
     }
 
     private onDisconnecting(): void {
@@ -269,7 +287,7 @@ export class FmodZeromqApi extends TypedEmitter<FmodZeromqApiEvents> implements 
     }
 
     private onDisconnected(): void {
-        this.emit( 'disconnect' );
+        process.nextTick( () => this.emit( 'disconnect' ) );
     }
 
 }

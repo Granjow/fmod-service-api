@@ -1,9 +1,9 @@
-import { FmodZeromqApi } from '../api/fmod-zeromq-api';
 import { FmodBank } from './fmod-types';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ILogger } from '../api/i-logger';
 import { IRequireBank } from './ports/i-require-bank';
 import { FmodEvent } from './fmod-event';
+import { IFmodApi } from '../ports/i-fmod-api';
 
 
 export interface FmodPlayerEvents {
@@ -19,7 +19,7 @@ interface LoadedBankInfo {
 
 export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implements IRequireBank {
     protected readonly _banks: FmodBank;
-    protected readonly _api: FmodZeromqApi;
+    protected readonly _api: IFmodApi;
 
     abstract readonly events: FmodEvent[];
 
@@ -35,7 +35,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     private readonly _languages: Set<string> = new Set();
     private readonly _eventsByName: Map<string, FmodEvent> = new Map();
 
-    protected constructor( api: FmodZeromqApi, bankDir: string, logger?: ILogger ) {
+    protected constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super();
         this._api = api;
         this._logger = logger;

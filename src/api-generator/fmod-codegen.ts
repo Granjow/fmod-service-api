@@ -66,7 +66,8 @@ export class FmodCodegen {
     private generateIncludes(): string {
         return this.loadTemplate( 'includes' )
             .replaceAll( '\'../../index\'', `'${this._importFrom}'` )
-            .replaceAll( '\'../../api/i-logger\'', `'${this._importFrom}'` );
+            .replaceAll( '\'../../api/i-logger\'', `'${this._importFrom}'` )
+            .replaceAll( /'..\/..\/ports\/.*'/g, `'${this._importFrom}'` );
     }
 
     private generateMainCode( mainName: string, eventData: ClassData[] ): string {
@@ -82,7 +83,7 @@ export class FmodCodegen {
 
         eventData.forEach( ( event, ix ) => {
             eventDefinitions.push( `${s4( ix )}${event.memberName}: ${event.className};` );
-            eventInitialisation.push( `${s8( ix )}this.${event.memberName} = new ${event.className}();` );
+            eventInitialisation.push( `${s8( ix )}this.${event.memberName} = new ${event.className}( logger );` );
             eventRegistration.push( `${s8( 1 )}this.registerEvent( this.${event.memberName} );` );
 
             if ( event.memberName !== event.originalName ) {

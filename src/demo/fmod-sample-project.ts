@@ -1,20 +1,21 @@
-import { FmodZeromqApi, ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from '../index';
+import { ContinuousParameter, FmodEvent, FmodPlayer, LabeledParameter } from '../index';
 import { ILogger } from '../index';
+import { IFmodApi } from '../index';
 
 
 export class FmodSampleProject extends FmodPlayer {
 
     events: FmodEvent[] = [];
 
-    constructor( api: FmodZeromqApi, bankDir: string, logger?: ILogger ) {
+    constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super( api, bankDir, logger );
-        this.musicLevel01 = new MusicLevel01();
+        this.musicLevel01 = new MusicLevel01( logger );
         this['Music/Level 01'] = this.musicLevel01;
-        this.musicLevel02 = new MusicLevel02();
+        this.musicLevel02 = new MusicLevel02( logger );
         this['Music/Level 02'] = this.musicLevel02;
-        this.uiCancel = new UiCancel();
+        this.uiCancel = new UiCancel( logger );
         this['UI/Cancel'] = this.uiCancel;
-        this.characterDialogue = new CharacterDialogue();
+        this.characterDialogue = new CharacterDialogue( logger );
         this['Character/Dialogue'] = this.characterDialogue;
         this.registerEvent( this.musicLevel01 );
         this.registerEvent( this.musicLevel02 );
@@ -62,8 +63,8 @@ class MusicLevel01Progression extends LabeledParameter<keyof ( typeof MusicLevel
 
 class MusicLevel01 extends FmodEvent {
 
-    constructor() {
-        super( 'Music/Level 01', 'Music', [  ] );
+    constructor( logger?: ILogger ) {
+        super( 'Music/Level 01', 'Music', [  ], logger );
         this.stinger = new MusicLevel01Stinger();
         this['Stinger'] = this.stinger;
         this.progression = new MusicLevel01Progression();
@@ -90,8 +91,8 @@ export class MusicLevel02Area extends ContinuousParameter {
 
 class MusicLevel02 extends FmodEvent {
 
-    constructor() {
-        super( 'Music/Level 02', 'Music', [  ] );
+    constructor( logger?: ILogger ) {
+        super( 'Music/Level 02', 'Music', [  ], logger );
         this.area = new MusicLevel02Area();
         this['Area'] = this.area;
         this.params.push( ...[
@@ -106,8 +107,8 @@ class MusicLevel02 extends FmodEvent {
 
 class UiCancel extends FmodEvent {
 
-    constructor() {
-        super( 'UI/Cancel', 'SFX', [  ] );
+    constructor( logger?: ILogger ) {
+        super( 'UI/Cancel', 'SFX', [  ], logger );
         // Nothing to construct
         this.params.push( ...[
             // No Parameters
@@ -120,8 +121,8 @@ class UiCancel extends FmodEvent {
 
 class CharacterDialogue extends FmodEvent {
 
-    constructor() {
-        super( 'Character/Dialogue', 'SFX', [ 'Dialogue' ] );
+    constructor( logger?: ILogger ) {
+        super( 'Character/Dialogue', 'SFX', [ 'Dialogue' ], logger );
         // Nothing to construct
         this.params.push( ...[
             // No Parameters

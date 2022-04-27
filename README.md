@@ -15,6 +15,11 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.5.0** (2022-04-27)
+  * Changed: The `connect`, `reconnect`, and `disconnect` events are now sent in a next
+    Node.js [Event Loop](https://nodejs.dev/learn/the-nodejs-event-loop)
+    which ensures that e.g. the connection ID is already updated when the event is received.
+  * Changed: Improved logging and remaining `console.log` statements migrated to `ILogger`
 * **2.4.0** (2022-04-07)
   * Added: `FmodPlayer.close()` to disconnect the ZeroMQ socket
 * **2.3.0** (2022-03-30) – requires FMOD service v1.0.0

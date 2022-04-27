@@ -1,6 +1,5 @@
 import { IBank } from '../ports/i-manage-events';
-import { FmodZeromqApi } from '../api/fmod-zeromq-api';
-import { IRequireBank } from './ports/i-require-bank';
+import { IFmodApi } from '../ports/i-fmod-api';
 
 
 export class FmodBank implements IBank {
@@ -35,12 +34,12 @@ export class FmodBank implements IBank {
 
 
 export class FmodParameter {
-    private _api: FmodZeromqApi | undefined;
+    private _api: IFmodApi | undefined;
 
     constructor( public name: string, public readonly eventId: string ) {
     }
 
-    init( eventId: string, api: FmodZeromqApi ): void {
+    init( eventId: string, api: IFmodApi ): void {
         this._api = api;
     }
 

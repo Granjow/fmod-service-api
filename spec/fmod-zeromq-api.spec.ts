@@ -22,21 +22,20 @@ describe( 'FMOD ZeroMQ API', () => {
                         logger: logger.child( { test: 'T1' } ),
                     } );
                     fza.on( 'connect', () => {
-                        fza.on( 'disconnect', () => {
-                            done();
-                        } );
-                        fza.disconnect();
+
+                        fza.on( 'disconnect', done );
+
+                        new Promise( resolve => setTimeout( resolve, 10 ) )
+                            .then( () => socket.receive() )
+                            .then( ( messages ) => {
+                                logger.info( 'Message received: ', messages.map( el => el.toString( 'utf-8' ) ).join( '; ' ) );
+                                if ( messages.length > 0 && messages[ 0 ].toString( 'utf-8' ) === 'get:id' ) {
+                                    socket.send( '1234' );
+                                }
+                            } )
+                            .then( () => fza.disconnect() );
                     } );
                     fza.connect();
-
-                    new Promise( resolve => setTimeout( resolve, 10 ) )
-                        .then( () => socket.receive() )
-                        .then( ( messages ) => {
-                            logger.info( 'Message received: ', messages.map( el => el.toString( 'utf-8' ) ).join( '; ' ) );
-                            if ( messages.length > 0 && messages[ 0 ].toString( 'utf-8' ) === 'get:id' ) {
-                                socket.send( '1234' );
-                            }
-                        } );
                 } );
         } );
 
@@ -77,7 +76,7 @@ describe( 'FMOD ZeroMQ API', () => {
                 }
             } ).enable();
 
-            const address = 'tcp://127.0.0.1:2999';
+            const address = 'tcp://127.0.0.1:2998';
             const fza = new FmodZeromqApi( address, {
                 socketStatusIntervalMillis: 500,
                 heartbeatIntervalMillis: 500,

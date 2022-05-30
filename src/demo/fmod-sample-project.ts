@@ -5,8 +5,6 @@ import { IFmodApi } from '../index';
 
 export class FmodSampleProject extends FmodPlayer {
 
-    events: FmodEvent[] = [];
-
     constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super( api, bankDir, logger );
         this.musicLevel01 = new MusicLevel01( logger );
@@ -21,12 +19,6 @@ export class FmodSampleProject extends FmodPlayer {
         this.registerEvent( this.musicLevel02 );
         this.registerEvent( this.uiCancel );
         this.registerEvent( this.characterDialogue );
-        this.events.push( ...[
-            this.musicLevel01,
-            this.musicLevel02,
-            this.uiCancel,
-            this.characterDialogue,
-        ] );
         this.configureLocalisation( [ 'Dialogue' ], [ 'EN', 'JP', 'CN' ], 'EN' );
     }
 
@@ -43,7 +35,7 @@ export class FmodSampleProject extends FmodPlayer {
 
 export class MusicLevel01Stinger extends ContinuousParameter {
     constructor() {
-        super( 'Stinger', 'event:/Music/Level 01' );
+        super( 'Stinger', 'event:/Music/Level 01', 0 );
     }
 }
 
@@ -56,7 +48,7 @@ const MusicLevel01ProgressionLabels = {
 
 class MusicLevel01Progression extends LabeledParameter<keyof ( typeof MusicLevel01ProgressionLabels )> {
     constructor() {
-        super( 'Progression', 'event:/Music/Level 01', MusicLevel01ProgressionLabels );
+        super( 'Progression', 'event:/Music/Level 01', MusicLevel01ProgressionLabels, 0 );
     }
 }
 
@@ -84,7 +76,7 @@ class MusicLevel01 extends FmodEvent {
 
 export class MusicLevel02Area extends ContinuousParameter {
     constructor() {
-        super( 'Area', 'event:/Music/Level 02' );
+        super( 'Area', 'event:/Music/Level 02', 0 );
     }
 }
 

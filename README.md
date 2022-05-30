@@ -15,6 +15,9 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.6.0** (2022-05-30)
+  * Added: `FmodPlayer.resetAllParameters()` resets all parameters to default values
+    (`0` by default, can be customised)
 * **2.5.0** (2022-04-27)
   * Changed: The `connect`, `reconnect`, and `disconnect` events are now sent in a next
     Node.js [Event Loop](https://nodejs.dev/learn/the-nodejs-event-loop)

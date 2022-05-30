@@ -92,9 +92,6 @@ export class FmodCodegen {
             }
         } );
 
-        const eventList = eventData
-            .map( ( el, ix ) => `${s12( ix )}this.${el.memberName},` );
-
         let localise = '// (no localised banks)';
         if ( this._data.localisation !== undefined ) {
 
@@ -115,7 +112,6 @@ export class FmodCodegen {
 
         return this.loadTemplate( 'main', names )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
-            .replace( '// EVENT_LIST', eventList.join( '\n' ) )
             .replace( '// LOCALISE', localise )
             .replace( '// CONSTRUCTOR', constructor );
     }
@@ -178,7 +174,9 @@ export class FmodCodegen {
 
         let code = this.loadTemplate( templateName, names )
             .replaceAll( 'PARAM_NAME', param.name )
-            .replaceAll( 'EVENT_ID', `event:/${event.name}` );
+            .replaceAll( 'EVENT_ID', `event:/${event.name}` )
+            .replaceAll( 'DEFAULT_VALUE', `${param.defaultValue ?? 0}` )
+        ;
 
         const s4 = this.createSpacer( 4 );
         if ( param.type === 'labeled' ) {

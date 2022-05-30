@@ -29,12 +29,14 @@ describe( 'FMOD ZeroMQ API', () => {
                     } );
                     fza.connect();
 
-                    socket.receive().then( ( messages ) => {
-                        logger.info( 'Message received: ', messages.map( el => el.toString( 'utf-8' ) ).join( '; ' ) );
-                        if ( messages.length > 0 && messages[ 0 ].toString( 'utf-8' ) === 'get:id' ) {
-                            socket.send( '1234' );
-                        }
-                    } );
+                    new Promise( resolve => setTimeout( resolve, 10 ) )
+                        .then( () => socket.receive() )
+                        .then( ( messages ) => {
+                            logger.info( 'Message received: ', messages.map( el => el.toString( 'utf-8' ) ).join( '; ' ) );
+                            if ( messages.length > 0 && messages[ 0 ].toString( 'utf-8' ) === 'get:id' ) {
+                                socket.send( '1234' );
+                            }
+                        } );
                 } );
         } );
 

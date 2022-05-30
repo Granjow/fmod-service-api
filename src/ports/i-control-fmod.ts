@@ -11,7 +11,7 @@ export interface IControlFmod {
 
     playVoice( eventId: string, key: string ): Promise<void>;
 
-    setParameter( eventId: string, name: string, value: number ): Promise<void>;
+    setParameter( eventId: string, paramName: string, value: number ): Promise<void>;
 
     isPlaying( eventId: string ): Promise<boolean>;
 

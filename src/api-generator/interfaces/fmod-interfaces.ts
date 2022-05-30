@@ -1,6 +1,7 @@
 export interface IFmodParam {
     name: string;
     type: 'continuous' | 'labeled';
+    defaultValue?: number;
 }
 
 export interface ContinuousParam extends IFmodParam {

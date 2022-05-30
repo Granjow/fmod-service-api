@@ -21,8 +21,6 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     protected readonly _banks: FmodBank;
     protected readonly _api: IFmodApi;
 
-    abstract readonly events: FmodEvent[];
-
     private _initCalled = false;
     private _firstConnection = true;
     private _currentLanguage: string | undefined;
@@ -54,7 +52,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         this._initCalled = true;
 
         this._logger?.info( 'Initialising FMOD Player' );
-        for ( const event of this.events ) {
+        for ( const event of this._eventsByName.values() ) {
             event.init( this._api, this );
         }
 
@@ -162,7 +160,14 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
                 }
             }
         }
+    }
 
+    async resetAllParameters(): Promise<void> {
+        for ( const event of this._eventsByName.values() ) {
+            for ( const param of event.params ) {
+                await param.setDefaultValue();
+            }
+        }
     }
 
     getEvent( eventName: string ): FmodEvent {

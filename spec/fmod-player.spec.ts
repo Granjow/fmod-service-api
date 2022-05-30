@@ -1,11 +1,20 @@
-import { FmodEvent, FmodPlayer, FmodZeromqApi } from '../src';
+import { ContinuousParameter, FmodEvent, FmodPlayer, FmodZeromqApi, LabeledParameter } from '../src';
+
+class TestEvent extends FmodEvent {
+    constructor( name: string ) {
+        super( name, 'bank', [] );
+
+        this.params.push( new ContinuousParameter( 'continuous', 'events/evC', 0 ) );
+        this.params.push( new LabeledParameter( 'labeled', 'events/evL', { low: 0, high: 1 }, 1 ) );
+    }
+}
 
 class TestFmodPlayer extends FmodPlayer {
     constructor( api: FmodZeromqApi ) {
         super( api, 'BANKDIR' );
-    }
 
-    readonly events: FmodEvent[] = [];
+        this.registerEvent( new TestEvent( 'X' ) );
+    }
 }
 
 describe( 'FMOD Player', () => {
@@ -89,5 +98,36 @@ describe( 'FMOD Player', () => {
             } );
         } );
 
+    } );
+
+    describe( 'Functionality', () => {
+        it( 'resets all parameters', ( done ) => {
+            // @ts-ignore
+            const api: FmodZeromqApi = {
+                loadBank: jest.fn().mockResolvedValue( undefined ),
+                unloadBank: jest.fn().mockResolvedValue( undefined ),
+                connect: jest.fn().mockResolvedValue( undefined ),
+                listLoadedBankPaths: jest.fn().mockResolvedValue( [] ),
+                setParameter: jest.fn().mockResolvedValue( undefined ),
+                // @ts-ignore
+                once: ( event, cb ) => {
+                    if ( event === 'connect' ) setImmediate( cb );
+                },
+                on: jest.fn(),
+            };
+
+            const player = new TestFmodPlayer( api );
+            player.init();
+
+
+            player.on( 'init', async () => {
+                await player.resetAllParameters();
+
+                expect( api.setParameter ).toHaveBeenCalledWith( 'events/evC', 'continuous', 0 );
+                expect( api.setParameter ).toHaveBeenCalledWith( 'events/evL', 'labeled', 1 );
+
+                done();
+            } );
+        } );
     } );
 } );

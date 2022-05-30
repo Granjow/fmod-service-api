@@ -5,8 +5,6 @@ import { IFmodApi } from '../index';
 
 export class TestProject extends FmodPlayer {
 
-    events: FmodEvent[] = [];
-
     constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super( api, bankDir, logger );
         this.musicLevel01 = new MusicLevel01( logger );
@@ -18,11 +16,6 @@ export class TestProject extends FmodPlayer {
         this.registerEvent( this.musicLevel01 );
         this.registerEvent( this.musicUeberLevel02 );
         this.registerEvent( this.uiCancel );
-        this.events.push( ...[
-            this.musicLevel01,
-            this.musicUeberLevel02,
-            this.uiCancel,
-        ] );
         this.configureLocalisation( [ 'SFX' ], [ 'en', 'de' ], 'de' );
     }
 
@@ -37,7 +30,7 @@ export class TestProject extends FmodPlayer {
 
 export class MusicLevel01UeberStinger extends ContinuousParameter {
     constructor() {
-        super( 'ÜberStinger', 'event:/Music/Level 01' );
+        super( 'ÜberStinger', 'event:/Music/Level 01', 0 );
     }
 }
 
@@ -50,7 +43,7 @@ const MusicLevel01ProgressionLabels = {
 
 class MusicLevel01Progression extends LabeledParameter<keyof ( typeof MusicLevel01ProgressionLabels )> {
     constructor() {
-        super( 'Progression', 'event:/Music/Level 01', MusicLevel01ProgressionLabels );
+        super( 'Progression', 'event:/Music/Level 01', MusicLevel01ProgressionLabels, 0 );
     }
 }
 
@@ -84,7 +77,7 @@ const MusicUeberLevel02ProgressionLabels = {
 
 class MusicUeberLevel02Progression extends LabeledParameter<keyof ( typeof MusicUeberLevel02ProgressionLabels )> {
     constructor() {
-        super( 'Progression', 'event:/Music/ÜberLevel 02', MusicUeberLevel02ProgressionLabels );
+        super( 'Progression', 'event:/Music/ÜberLevel 02', MusicUeberLevel02ProgressionLabels, 0 );
     }
 }
 

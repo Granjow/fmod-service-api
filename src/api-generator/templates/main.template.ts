@@ -6,14 +6,9 @@ import { IFmodApi } from '../../ports/i-fmod-api';
 
 export class CLASSNAME extends FmodPlayer {
 
-    events: FmodEvent[] = [];
-
     constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super( api, bankDir, logger );
         // CONSTRUCTOR
-        this.events.push( ...[
-            // EVENT_LIST
-        ] );
         // LOCALISE
     }
 

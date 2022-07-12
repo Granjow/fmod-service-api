@@ -11,7 +11,11 @@ await player.musicLevel01.stinger.setValue( 1 );
 await player.uiCancel.play();
 ```
 
+To get started, check the [demo][demos] directory in the code. Also, the code is documented,
+so your IDE should provide some support.
+
 [service]: https://github.com/Granjow/fmod-service
+[demos]: https://github.com/Granjow/fmod-service-api/tree/master/src/demo
 
 ## Changelog
 

@@ -10,7 +10,7 @@ const parentDir = `${os.homedir()}/Documents/FMOD Studio/examples/Build/Desktop/
 
 const dp = new FmodSampleProject( api, parentDir, logger );
 
-const onInit = async () => {
+const onInit = async (): Promise<void> => {
     await dp.musicLevel01.start();
     await dp.uiCancel.play();
 

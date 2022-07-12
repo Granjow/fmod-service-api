@@ -13,7 +13,7 @@
     "build": "tsc",
     "tsc": "tsc",
     "lint": "eslint -c .eslintrc.js \"src/**\" \"spec/**\"",
-    "test": "jest",
+    "test": "jest --forceExit",
     "prepack": "rm -rf dist && npm run build",
     "prepublishOnly": "npm run test"
   },

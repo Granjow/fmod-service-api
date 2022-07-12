@@ -186,7 +186,10 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
                 const release = await this._socketSempahore.acquire();
                 try {
-                    this._logger?.trace( `Closed: ${this._socket?.closed}, readable: ${this._socket?.readable}, writable: ${this._socket?.writable}` );
+                    // Socket can be …
+                    // closed → no connection
+                    // writable → all fine. This is how it should be after sending and receiving a message.
+                    // readable → only when we did not read the response, but the API should always read after writing
                     const writableStatus = this._socket.writable;
                     if ( writableStatus !== lastWritableStatus ) {
                         lastWritableStatus = writableStatus;
@@ -234,9 +237,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
             this._logger?.info( `Send timeout set to ${this._socket.sendTimeout}` );
              */
 
+            // After sending a message to the socket, it is not writable anymore (and hopefully not closed)
             const sendPromise = this._socket.send( command );
-
-            this._logger?.info( `Writable: ${this._socket.writable}, closed: ${this._socket.closed}` );
 
             const [ response ] = await this._socket.receive();
             this._logger?.trace( `Received: ${response}` );

@@ -47,6 +47,17 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         return this._currentLanguage;
     }
 
+    /**
+     * Returns all events that have been configured for this player.
+     */
+    get allEvents(): FmodEvent[] {
+        return Array.from( this._eventsByName.values() );
+    }
+
+    /**
+     * Initialise the player by connecting it to the FMOD service
+     * using the provided API.
+     */
     init(): void {
         if ( this._initCalled ) throw new Error( 'init() already called' );
         this._initCalled = true;
@@ -129,6 +140,14 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         this._loadedBanksByName.delete( bankName );
     }
 
+    /**
+     *
+     * @param bankNames Banks which are localised. If e.g. Voice is localised, the player will load
+     * Voice_en, Voice_de etc. according to the languages that have been configured.
+     * @param languages Languages supported by the localised banks. This is the Locale Code in FMOD,
+     * not the full name of the language.
+     * @param initialLanguage Default language to use when none has been configured.
+     */
     configureLocalisation( bankNames: string[], languages: string[], initialLanguage: string ): void {
         if ( this._initCalled ) throw new Error( 'Localisation must be configured before initialisation.' );
         if ( initialLanguage === undefined ) throw new Error( 'Initial language must be provided.' );

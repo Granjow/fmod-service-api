@@ -19,6 +19,27 @@ class TestFmodPlayer extends FmodPlayer {
 
 describe( 'FMOD Player', () => {
     describe( 'Initialisation', () => {
+        it( 'provides events list', () => {
+
+            // @ts-ignore
+            const api: FmodZeromqApi = {
+                loadBank: jest.fn().mockResolvedValue( undefined ),
+                unloadBank: jest.fn().mockResolvedValue( undefined ),
+                listLoadedBankPaths: jest.fn().mockResolvedValue( [] ),
+                // @ts-ignore
+                once: jest.fn(),
+                on: jest.fn(),
+                connect: jest.fn().mockReturnValue( true ),
+            };
+
+            const player = new TestFmodPlayer( api );
+
+            expect( player.allEvents.length ).toBe( 1 );
+            expect( player.allEvents[ 0 ].eventName ).toBe( 'X' );
+            expect( player.getEvent( 'X' ) ).toBeDefined();
+            expect( player.getEvent( 'X' ).eventName ).toBe( 'X' );
+            expect( () => player.getEvent( 'Y' ) ).toThrow();
+        } );
         it( 'loads banks', ( done ) => {
 
             let connected = false;

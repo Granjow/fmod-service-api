@@ -15,6 +15,8 @@ await player.uiCancel.play();
 
 ## Changelog
 
+* **2.7.0** (2022-07-12)
+  * Added: `FmodPlayer.allEvents` returns all configured events
 * **2.6.0** (2022-05-30)
   * Added: `FmodPlayer.resetAllParameters()` resets all parameters to default values
     (`0` by default, can be customised)

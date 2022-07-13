@@ -1,8 +1,9 @@
 import { ContinuousParameter, FmodEvent, FmodPlayer, FmodZeromqApi, LabeledParameter } from '../src';
+import { FmodEventType } from '../src/api-generator/interfaces/fmod-event-type';
 
 class TestEvent extends FmodEvent {
     constructor( name: string ) {
-        super( name, 'bank', [] );
+        super( name, 'bank', [], FmodEventType.event );
 
         this.params.push( new ContinuousParameter( 'continuous', 'events/evC', 0 ) );
         this.params.push( new LabeledParameter( 'labeled', 'events/evL', { low: 0, high: 1 }, 1 ) );

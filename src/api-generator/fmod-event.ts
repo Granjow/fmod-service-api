@@ -2,6 +2,7 @@ import { IRequireBank } from './ports/i-require-bank';
 import { FmodParameter } from './fmod-types';
 import { IFmodApi } from '../ports/i-fmod-api';
 import { ILogger } from '../api/i-logger';
+import { FmodEventType } from './interfaces/fmod-event-type';
 
 export class FmodEvent {
     public readonly id: string;
@@ -13,13 +14,15 @@ export class FmodEvent {
 
     private _api: IFmodApi | undefined;
     private _bankLoader: IRequireBank | undefined;
+    private readonly _eventType: FmodEventType;
 
     // Add parameters which should be initialised here
     public readonly params: FmodParameter[] = [];
 
-    constructor( name: string, bankName: string, additionalBankRequirements: string[], logger?: ILogger ) {
-        this.id = `event:/${name}`;
+    constructor( name: string, bankName: string, additionalBankRequirements: string[], eventType: FmodEventType, logger?: ILogger ) {
+        this.id = `${eventType}:/${name}`;
         this._logger = logger;
+        this._eventType = eventType;
         this.eventName = name;
         this.bankName = bankName;
         this.additionalBankRequirements = additionalBankRequirements;
@@ -43,6 +46,9 @@ export class FmodEvent {
     }
 
     async play(): Promise<void> {
+        if ( this._eventType === FmodEventType.snapshot ) {
+            throw new Error( `${this.id} is a snapshot and should be start()ed/stop()ped.` );
+        }
         await this.ensureBankLoaded();
         return this.api.play( this.id );
     }

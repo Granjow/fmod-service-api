@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import { CodeNames, NamingTools } from './naming-tools';
 import { IFmodBank, IFmodEvent, IFmodParam, IFmodProject, LabeledParam } from './interfaces/fmod-interfaces';
+import { FmodEventType } from './interfaces/fmod-event-type';
 
 interface ClassData {
     className: string;
@@ -140,8 +141,18 @@ export class FmodCodegen {
 
         const useOrDefault = ( text: string, defaultValue: string ): string => text.length > 0 ? text : defaultValue;
 
+        let eventTypeKey: keyof ( typeof FmodEventType ) = 'event';
+        if ( event.eventType !== undefined ) {
+            for ( const [ k, v ] of Object.entries( FmodEventType ) ) {
+                if ( v === event.eventType ) {
+                    eventTypeKey = k as keyof ( typeof FmodEventType );
+                }
+            }
+        }
+
         const code = this.loadTemplate( 'event', names )
             .replace( 'EVENT_NAME', `${event.name}` )
+            .replace( 'EVENT_TYPE', `FmodEventType.${eventTypeKey}` )
             .replace( 'BANK_NAME', `${bank.bankName}` )
             .replace( '\'ADDITIONAL_BANKS\'', `${event.requiresOtherBanks?.map( el => `'${el}'` ).join( ', ' ) ?? ''}` )
             .replace( '// PARAM_LIST', useOrDefault( parameterList.join( '\n' ), '// No Parameters' ) )

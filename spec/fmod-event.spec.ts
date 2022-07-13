@@ -1,6 +1,7 @@
 import { FmodEvent } from '../src/api-generator/fmod-event';
 import { FmodZeromqApi } from '../src';
 import { IRequireBank } from '../src/api-generator/ports/i-require-bank';
+import { FmodEventType } from '../src/api-generator/interfaces/fmod-event-type';
 
 describe( 'FMOD Event', () => {
     describe( 'Additional banks', () => {
@@ -14,7 +15,7 @@ describe( 'FMOD Event', () => {
                 ensureBankLoaded: jest.fn(),
             };
 
-            const event = new FmodEvent( '', 'A', [ 'B' ] );
+            const event = new FmodEvent( '', 'A', [ 'B' ], FmodEventType.event );
             event.init( api, bankLoader );
 
             await event.play();

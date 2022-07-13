@@ -19,6 +19,10 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.8.0** (2022-07-13)
+  * Added: Basic support for playing mixer snapshots.
+    This feature will be improved in future, at the moment snapshots are defined as normal events
+    and have to be assigned to a bank.
 * **2.7.0** (2022-07-12)
   * Added: `FmodPlayer.allEvents` returns all configured events
 * **2.6.0** (2022-05-30)

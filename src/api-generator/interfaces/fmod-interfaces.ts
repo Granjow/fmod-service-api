@@ -1,3 +1,5 @@
+import { FmodEventType } from './fmod-event-type';
+
 export interface IFmodParam {
     name: string;
     type: 'continuous' | 'labeled';
@@ -24,6 +26,7 @@ export type FmodParamType = ContinuousParam | LabeledParam;
 
 export interface IFmodEvent {
     name: string;
+    eventType?: FmodEventType;
     params: FmodParamType[];
     requiresOtherBanks?: string[];
 }

@@ -22,13 +22,13 @@ const onInit = async (): Promise<void> => {
     await dp.characterDialogue.playVoice( 'welcome' );
     banks = await api.listLoadedBankPaths();
     console.log( `Loaded banks after playing voice: ${banks.join( ', ' )}` );
-    await new Promise( resolve => setTimeout( resolve, 5000 ) );
+    await new Promise( resolve => setTimeout( resolve, 4500 ) );
     await dp.setLanguage( 'JP' );
     await dp.characterDialogue.playVoice( 'welcome' );
     banks = await api.listLoadedBankPaths();
     console.log( `Loaded banks after switching language: ${banks.join( ', ' )}` );
 
-    await new Promise( resolve => setTimeout( resolve, 10000 ) );
+    await new Promise( resolve => setTimeout( resolve, 6000 ) );
     await dp.uiCancel.play();
     await dp.musicLevel01.stinger.setValue( 1 );
 
@@ -43,9 +43,17 @@ const onInit = async (): Promise<void> => {
     await new Promise( resolve => setTimeout( resolve, 2000 ) );
     await dp.musicLevel01.stop();
     await dp.musicLevel02.start();
+    await dp.musicLevel02.area.setValue( 62 );
+
+    await new Promise( resolve => setTimeout( resolve, 4000 ) );
+    await dp.pause.start();
+    await new Promise( resolve => setTimeout( resolve, 4000 ) );
+    await dp.pause.stop();
 
     await new Promise( resolve => setTimeout( resolve, 5000 ) );
     await dp.musicLevel02.stop();
+
+    dp.close();
 };
 
 dp.on( 'init', () => onInit()

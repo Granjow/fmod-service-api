@@ -1,4 +1,5 @@
 import { IFmodBank, IFmodProject } from '../api-generator/interfaces/fmod-interfaces';
+import { FmodEventType } from '../api-generator/interfaces/fmod-event-type';
 
 /**
  * Test data to test special cases
@@ -52,6 +53,10 @@ export const sampleProjectData: IFmodBank[] = [ {
                 labels: [ { value: 0, name: 'Intro' }, { value: 1, name: 'Main' } ]
             }
         ],
+    }, {
+        name: 'Pause',
+        eventType: FmodEventType.snapshot,
+        params: [],
     }, {
         name: 'Music/Level 02',
         params: [

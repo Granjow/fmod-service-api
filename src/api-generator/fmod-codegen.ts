@@ -37,13 +37,14 @@ export class FmodCodegen {
 
         const allData: ClassData[] = [];
         const eventData: ClassData[] = [];
+        const globalParamsData: ClassData[] = [];
 
         for ( const bank of this._data.banks ) {
 
             for ( const event of bank.events ) {
                 const paramData: ClassData[] = [];
                 for ( const param of event.params ) {
-                    paramData.push( this.generateParamCode( param, event ) );
+                    paramData.push( this.generateLocalParamCode( param, event ) );
                 }
                 const eventCode = this.generateEventCode( event, bank, paramData );
                 eventData.push( eventCode );
@@ -53,7 +54,12 @@ export class FmodCodegen {
             }
         }
 
-        const mainClass = this.generateMainCode( mainName, eventData );
+        for ( const param of this._data.globalParameters ?? [] ) {
+            globalParamsData.push( this.generateGlobalParamCode( param ) );
+        }
+        allData.push( ...globalParamsData );
+
+        const mainClass = this.generateMainCode( mainName, eventData, globalParamsData );
 
         const codeElements = [
             this.generateIncludes(),
@@ -71,16 +77,17 @@ export class FmodCodegen {
             .replaceAll( /'..\/..\/ports\/.*'/g, `'${this._importFrom}'` );
     }
 
-    private generateMainCode( mainName: string, eventData: ClassData[] ): string {
+    private generateMainCode( mainName: string, eventData: ClassData[], globalParamData: ClassData[] ): string {
         const names = NamingTools.generateClassNames( mainName );
 
         const s4 = this.createSpacer( 4 );
         const s8 = this.createSpacer( 8 );
-        const s12 = this.createSpacer( 12 );
 
         const eventDefinitions: string[] = [];
         const eventInitialisation: string[] = [];
         const eventRegistration: string[] = [];
+        const globalParamDefs: string[] = [];
+        const globalParamRegistration: string[] = [];
 
         eventData.forEach( ( event, ix ) => {
             eventDefinitions.push( `${s4( ix )}${event.memberName}: ${event.className};` );
@@ -91,6 +98,11 @@ export class FmodCodegen {
                 eventDefinitions.push( `${s4( 1 )}'${event.originalName}': ${event.className};` );
                 eventInitialisation.push( `${s8( 1 )}this['${event.originalName}'] = this.${event.memberName};` );
             }
+        } );
+
+        globalParamData.forEach( ( param, ix ) => {
+            globalParamDefs.push( `${s8( ix )}${param.memberName}: new ${param.className}(),` );
+            globalParamRegistration.push( `${s8( 1 )}this.registerGlobalParam( this.globalParameters.${param.memberName} );` );
         } );
 
         let localise = '// (no localised banks)';
@@ -109,11 +121,13 @@ export class FmodCodegen {
 
         const constructor = eventInitialisation
             .concat( eventRegistration )
+            .concat( globalParamRegistration )
             .join( '\n' );
 
         return this.loadTemplate( 'main', names )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// LOCALISE', localise )
+            .replace( '// GLOBAL_PARAMS', globalParamDefs.join( '\n' ) )
             .replace( '// CONSTRUCTOR', constructor );
     }
 
@@ -167,9 +181,18 @@ export class FmodCodegen {
         };
     }
 
+    private generateGlobalParamCode( param: IFmodParam ): ClassData {
+        const names = NamingTools.generateClassNames( param.name, 'Global' );
+        return this.generateParamCode( param, 'global', names );
 
-    private generateParamCode( param: IFmodParam, event: IFmodEvent ): ClassData {
+    }
+
+    private generateLocalParamCode( param: IFmodParam, event: IFmodEvent ): ClassData {
         const names = NamingTools.generateClassNames( param.name, event.name );
+        return this.generateParamCode( param, `event:/${event.name}`, names );
+    }
+
+    private generateParamCode( param: IFmodParam, path: string, names: CodeNames ): ClassData {
 
         let templateName: string;
         switch ( param.type ) {
@@ -185,7 +208,7 @@ export class FmodCodegen {
 
         let code = this.loadTemplate( templateName, names )
             .replaceAll( 'PARAM_NAME', param.name )
-            .replaceAll( 'EVENT_ID', `event:/${event.name}` )
+            .replaceAll( 'EVENT_ID', path )
             .replaceAll( 'DEFAULT_VALUE', `${param.defaultValue ?? 0}` )
         ;
 

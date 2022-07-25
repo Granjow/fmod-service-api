@@ -1,4 +1,4 @@
-import { FmodBank } from './fmod-types';
+import { FmodBank, FmodParameter } from './fmod-types';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { ILogger } from '../api/i-logger';
 import { IRequireBank } from './ports/i-require-bank';
@@ -32,6 +32,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     private readonly _localisedBanks: Set<string> = new Set();
     private readonly _languages: Set<string> = new Set();
     private readonly _eventsByName: Map<string, FmodEvent> = new Map();
+    private readonly _globalParamsByName: Map<string, FmodParameter> = new Map();
 
     protected constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super();
@@ -48,10 +49,17 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
     }
 
     /**
-     * Returns all events that have been configured for this player.
+     * Returns all events that have been registered for this player.
      */
     get allEvents(): FmodEvent[] {
         return Array.from( this._eventsByName.values() );
+    }
+
+    /**
+     * Returns all global parameters that have been registered for this player.
+     */
+    get allGlobalParameters(): FmodParameter[] {
+        return Array.from( this._globalParamsByName.values() );
     }
 
     /**
@@ -65,6 +73,10 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         this._logger?.info( 'Initialising FMOD Player' );
         for ( const event of this._eventsByName.values() ) {
             event.init( this._api, this );
+        }
+
+        for ( const param of this._globalParamsByName.values() ) {
+            param.init( 'global', this._api );
         }
 
         this._logger?.info( 'Connecting to FMOD and loading banks' );
@@ -117,7 +129,7 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         }
 
         const isLocalisedBank = this.isLocalisedBank( bankName );
-        if ( this.isLocalisedBank( bankName ) ) {
+        if ( isLocalisedBank ) {
             const bankInfo = this._loadedBanksByName.get( bankName );
 
             // If we know what language is loaded, unload it.
@@ -189,6 +201,9 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         }
     }
 
+    /**
+     * Retrieves an event by its name (event path).
+     */
     getEvent( eventName: string ): FmodEvent {
         const event = this._eventsByName.get( eventName );
         if ( event === undefined ) {
@@ -197,10 +212,33 @@ export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implemen
         return event;
     }
 
+    /**
+     * Retrieves a global parameter by name (parameter path).
+     */
+    getGlobalParameter( paramName: string ): FmodParameter {
+        const param = this._globalParamsByName.get( paramName );
+        if ( param === undefined ) {
+            throw new Error( `Parameter ${paramName} is not registered as global parameter.` );
+        }
+        return param;
+    }
+
+    /**
+     * Registers an event so it can later on be retrieved with the `getEvent()` function.
+     */
     protected registerEvent( event: FmodEvent ): void {
         if ( this._eventsByName.has( event.eventName ) ) throw new Error( `Event ${event.eventName} is already registered.` );
 
         this._eventsByName.set( event.eventName, event );
+    }
+
+    /**
+     * Registers a global parameter so it can later on be retrieved with the `getGlobalParameter()` function.
+     */
+    protected registerGlobalParam( param: FmodParameter ): void {
+        if ( this._globalParamsByName.has( param.name ) ) throw new Error( `Global parameter ${param.name} is already registered.` );
+
+        this._globalParamsByName.set( param.name, param );
     }
 
     private async initBanks(): Promise<void> {

@@ -45,4 +45,5 @@ export interface ILocalisationData {
 export interface IFmodProject {
     localisation?: ILocalisationData;
     banks: IFmodBank[];
+    globalParameters?: IFmodParam[]
 }

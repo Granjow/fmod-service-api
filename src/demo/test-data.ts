@@ -79,5 +79,10 @@ export const sampleProject: IFmodProject = {
     localisation: {
         languages: [ 'EN', 'JP', 'CN' ],
         defaultLanguage: 'EN',
-    }
+    },
+    globalParameters: [ {
+        name: 'Test',
+        type: 'continuous',
+        defaultValue: 0,
+    } ],
 };

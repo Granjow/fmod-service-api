@@ -1,4 +1,4 @@
-import { FmodEvent, FmodPlayer } from '../../index';
+import { FmodPlayer } from '../../index';
 import { ILogger } from '../../api/i-logger';
 import { IFmodApi } from '../../ports/i-fmod-api';
 
@@ -11,6 +11,10 @@ export class CLASSNAME extends FmodPlayer {
         // CONSTRUCTOR
         // LOCALISE
     }
+
+    globalParameters = {
+        // GLOBAL_PARAMS
+    };
 
     // EVENT_DEF
 }

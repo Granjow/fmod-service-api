@@ -15,6 +15,7 @@ class TestFmodPlayer extends FmodPlayer {
         super( api, 'BANKDIR' );
 
         this.registerEvent( new TestEvent( 'X' ) );
+        this.registerGlobalParam( new LabeledParameter( 'global', 'irrelevant', { low: -1, high: 1 }, 0 ) );
     }
 }
 
@@ -40,6 +41,26 @@ describe( 'FMOD Player', () => {
             expect( player.getEvent( 'X' ) ).toBeDefined();
             expect( player.getEvent( 'X' ).eventName ).toBe( 'X' );
             expect( () => player.getEvent( 'Y' ) ).toThrow();
+        } );
+        it( 'provides global parameters', () => {
+
+            // @ts-ignore
+            const api: FmodZeromqApi = {
+                loadBank: jest.fn().mockResolvedValue( undefined ),
+                unloadBank: jest.fn().mockResolvedValue( undefined ),
+                listLoadedBankPaths: jest.fn().mockResolvedValue( [] ),
+                // @ts-ignore
+                once: jest.fn(),
+                on: jest.fn(),
+                connect: jest.fn().mockReturnValue( true ),
+            };
+
+            const player = new TestFmodPlayer( api );
+
+            expect( player.allGlobalParameters.length ).toBe( 1 );
+            expect( player.allGlobalParameters[ 0 ].name ).toBe( 'global' );
+            expect( player.getGlobalParameter( 'global' ) ).toBeDefined();
+            expect( () => player.getGlobalParameter( 'none' ) ).toThrow();
         } );
         it( 'loads banks', ( done ) => {
 

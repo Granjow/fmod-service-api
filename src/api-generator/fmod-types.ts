@@ -38,7 +38,7 @@ export class FmodParameter {
     private _api: IFmodApi | undefined;
     private readonly _defaultValue: number;
 
-    constructor( public name: string, public readonly eventId: string, defaultValue?: number ) {
+    constructor( public name: string, public readonly eventId: string | 'global', defaultValue?: number ) {
         this._defaultValue = defaultValue ?? 0;
     }
 

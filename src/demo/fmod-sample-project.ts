@@ -22,8 +22,13 @@ export class FmodSampleProject extends FmodPlayer {
         this.registerEvent( this.musicLevel02 );
         this.registerEvent( this.uiCancel );
         this.registerEvent( this.characterDialogue );
+        this.registerGlobalParam( this.globalParameters.test );
         this.configureLocalisation( [ 'Dialogue' ], [ 'EN', 'JP', 'CN' ], 'EN' );
     }
+
+    globalParameters = {
+        test: new GlobalTest(),
+    };
 
     musicLevel01: MusicLevel01;
     'Music/Level 01': MusicLevel01;
@@ -141,4 +146,11 @@ class CharacterDialogue extends FmodEvent {
     }
 
     // No definitions
+}
+
+
+export class GlobalTest extends ContinuousParameter {
+    constructor() {
+        super( 'Test', 'global', 0 );
+    }
 }

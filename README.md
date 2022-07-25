@@ -19,6 +19,8 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.9.0** (2022-07-25)
+  * Added: Support for global FMOD parameters. (This requires FMOD Service 1.1.0 or newer.)
 * **2.8.0** (2022-07-13)
   * Added: Basic support for playing mixer snapshots.
     This feature will be improved in future, at the moment snapshots are defined as normal events

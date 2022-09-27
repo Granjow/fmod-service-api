@@ -119,6 +119,8 @@ export class FmodCodegen {
             localise = `this.configureLocalisation( [ ${localisedBanks} ], [ ${languages} ], '${this._data.localisation.defaultLanguage}' );`;
         }
 
+        const globalParams = globalParamDefs.length > 0 ? globalParamDefs.join( '\n' ) : '// No global parameters.';
+
         const constructor = eventInitialisation
             .concat( eventRegistration )
             .concat( globalParamRegistration )
@@ -127,7 +129,7 @@ export class FmodCodegen {
         return this.loadTemplate( 'main', names )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// LOCALISE', localise )
-            .replace( '// GLOBAL_PARAMS', globalParamDefs.join( '\n' ) )
+            .replace( '// GLOBAL_PARAMS', globalParams )
             .replace( '// CONSTRUCTOR', constructor );
     }
 

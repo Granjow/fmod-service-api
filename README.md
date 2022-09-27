@@ -19,6 +19,8 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.9.1** (2022-09-27)
+  * Changed: Minor code style issue (if global parameters are empty, a comment is inserted to prevent space-only line)
 * **2.9.0** (2022-07-25)
   * Added: Support for global FMOD parameters. (This requires FMOD Service 1.1.0 or newer.)
 * **2.8.0** (2022-07-13)

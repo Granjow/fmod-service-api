@@ -3,7 +3,8 @@ import type { ILogger } from '../index';
 import { IFmodApi } from '../index';
 
 
-export class FmodSampleProject extends FmodPlayer {
+
+export class FmodSampleProject extends FmodPlayer<IFmodProject> {
 
     public readonly rawProjectData: IFmodProject = {"banks":[{"bankName":"Music","events":[{"name":"Music/Level 01","params":[{"name":"Stinger","type":"continuous","min":0,"max":1},{"name":"Progression","type":"labeled","labels":[{"value":0,"name":"Intro"},{"value":1,"name":"Main"}]}]},{"name":"Pause","eventType":"snapshot","params":[]},{"name":"Music/Level 02","params":[{"name":"Area","type":"continuous","min":0,"max":80}]}]},{"bankName":"SFX","events":[{"name":"UI/Cancel","params":[]},{"name":"Character/Dialogue","params":[],"requiresOtherBanks":["Dialogue"]}]},{"bankName":"Dialogue","localised":true,"events":[]}],"localisation":{"languages":["EN","JP","CN"],"defaultLanguage":"EN"},"globalParameters":[{"name":"Test","type":"continuous","defaultValue":0}]} as IFmodProject; // eslint-disable-line quotes, object-curly-spacing
 

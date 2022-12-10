@@ -1,11 +1,12 @@
 import { ContinuousParameter, FmodEvent, FmodEventType, FmodPlayer, LabeledParameter, IFmodProject } from '../index';
 import type { ILogger } from '../index';
 import { IFmodApi } from '../index';
+import type { IExtendedFmodProject } from './test-data';
 
 
-export class TestProject extends FmodPlayer {
+export class TestProject extends FmodPlayer<IExtendedFmodProject> {
 
-    public readonly rawProjectData: IFmodProject = {"banks":[{"bankName":"Music","events":[{"name":"Music/Level 01","params":[{"name":"ÜberStinger","type":"continuous","min":0,"max":1},{"name":"Progression","type":"labeled","labels":[{"value":0,"name":"Intro"},{"value":1,"name":"Main"}]}]},{"name":"Music/ÜberLevel 02","params":[{"name":"Progression","type":"labeled","labels":[{"value":0,"name":"Intro"},{"value":1,"name":"Äxtra"}]}]}]},{"bankName":"SFX","localised":true,"events":[{"name":"UI/Cancel","params":[]}]}],"localisation":{"languages":["en","de"],"defaultLanguage":"de"}} as IFmodProject; // eslint-disable-line quotes, object-curly-spacing
+    public readonly rawProjectData: IExtendedFmodProject = {"banks":[{"bankName":"Music","events":[{"name":"Music/Level 01","params":[{"name":"ÜberStinger","type":"continuous","min":0,"max":1},{"name":"Progression","type":"labeled","labels":[{"value":0,"name":"Intro"},{"value":1,"name":"Main"}]}]},{"name":"Music/ÜberLevel 02","params":[{"name":"Progression","type":"labeled","labels":[{"value":0,"name":"Intro"},{"value":1,"name":"Äxtra"}]}]}]},{"bankName":"SFX","localised":true,"events":[{"name":"UI/Cancel","params":[]}]}],"localisation":{"languages":["en","de"],"defaultLanguage":"de"},"testProperty":"foo"} as IExtendedFmodProject; // eslint-disable-line quotes, object-curly-spacing
 
     constructor( api: IFmodApi, bankDir: string, logger?: ILogger ) {
         super( api, bankDir, logger );

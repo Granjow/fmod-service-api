@@ -10,12 +10,24 @@ interface ClassData {
     code: string;
 }
 
+export interface FmodCodegenOptions {
+    /**
+     * Customises the type returned by FmodPlayer.rawProjectData.
+     */
+    projectDataType?: {
+        name: string;
+        importInstruction: string;
+    };
+}
+
 export class FmodCodegen {
     private readonly _data: IFmodProject;
+    private readonly _options: FmodCodegenOptions | undefined;
     private _importFrom = '@geheimgang188/fmod-service-api';
 
-    constructor( data: IFmodProject ) {
+    constructor( data: IFmodProject, options?: FmodCodegenOptions ) {
         this._data = data;
+        this._options = options;
     }
 
     /**
@@ -71,10 +83,17 @@ export class FmodCodegen {
     }
 
     private generateIncludes(): string {
+
+        const customIncludeList: string[] = [];
+        if ( this._options?.projectDataType !== undefined ) {
+            customIncludeList.push( this._options.projectDataType.importInstruction );
+        }
+
         return this.loadTemplate( 'includes' )
             .replaceAll( '\'../../index\'', `'${this._importFrom}'` )
             .replaceAll( '\'../../api/i-logger\'', `'${this._importFrom}'` )
-            .replaceAll( /'..\/..\/ports\/.*'/g, `'${this._importFrom}'` );
+            .replaceAll( /'..\/..\/ports\/.*'/g, `'${this._importFrom}'` )
+            .replace( '// CUSTOM_INCLUDES', customIncludeList.join( '\n' ) );
     }
 
     private generateMainCode( mainName: string, eventData: ClassData[], globalParamData: ClassData[] ): string {
@@ -126,10 +145,12 @@ export class FmodCodegen {
             .concat( globalParamRegistration )
             .join( '\n' );
 
-        const eslintIgnores=' // eslint-disable-line quotes, object-curly-spacing';
-        const projectRawData = `public readonly rawProjectData: IFmodProject = ${JSON.stringify( this._data )} as IFmodProject;${eslintIgnores}`;
+        const projectDataType = this._options?.projectDataType?.name ?? 'IFmodProject';
+        const eslintIgnores = ' // eslint-disable-line quotes, object-curly-spacing';
+        const projectRawData = `public readonly rawProjectData: ${projectDataType} = ${JSON.stringify( this._data )} as ${projectDataType};${eslintIgnores}`;
 
         return this.loadTemplate( 'main', names )
+            .replace( '/* PROJECT_DATA_TYPE */', `<${projectDataType}>` )
             .replace( '// RAW_PROJECT_DATA', projectRawData )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// LOCALISE', localise )

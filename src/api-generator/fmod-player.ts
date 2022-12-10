@@ -18,13 +18,13 @@ interface LoadedBankInfo {
     loadedLanguage: undefined | string;
 }
 
-export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implements IRequireBank {
+export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProject> extends TypedEmitter<FmodPlayerEvents> implements IRequireBank {
 
     /**
      * Raw project data which was used to generate this player, if it was generated.
      * Otherwise, this object is undefined.
      */
-    public readonly rawProjectData: IFmodProject | undefined;
+    public readonly rawProjectData: TProjectData | undefined;
 
     protected readonly _banks: FmodBank;
     protected readonly _api: IFmodApi;

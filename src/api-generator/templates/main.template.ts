@@ -1,11 +1,10 @@
 import { FmodPlayer } from '../../index';
 import { ILogger } from '../../api/i-logger';
 import { IFmodApi } from '../../ports/i-fmod-api';
-import { IFmodProject } from '../interfaces/fmod-interfaces';
 
 // begin-template
 
-export class CLASSNAME extends FmodPlayer {
+export class CLASSNAME extends FmodPlayer/* PROJECT_DATA_TYPE */ {
 
     // RAW_PROJECT_DATA
 

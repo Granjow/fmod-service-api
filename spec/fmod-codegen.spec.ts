@@ -11,7 +11,12 @@ describe( 'Codegen', () => {
     } );
 
     it( 'compiles generated API code', () => {
-        const code = new FmodCodegen( testBankProject )
+        const code = new FmodCodegen( testBankProject, {
+            projectDataType: {
+                name: 'IExtendedFmodProject',
+                importInstruction: 'import type { IExtendedFmodProject } from \'./test-data\';',
+            },
+        } )
             .importFrom( '../index' )
             .generate( 'TestProject' );
 

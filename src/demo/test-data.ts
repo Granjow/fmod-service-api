@@ -30,12 +30,20 @@ export const testBankData: IFmodBank[] = [ {
     events: [ { name: 'UI/Cancel', params: [] } ]
 } ];
 
-export const testBankProject: IFmodProject = {
+/**
+ * Only used for unit testing the code generator
+ */
+export interface IExtendedFmodProject extends IFmodProject {
+    testProperty: string;
+}
+
+export const testBankProject: IExtendedFmodProject = {
     banks: testBankData,
     localisation: {
         languages: [ 'en', 'de' ],
         defaultLanguage: 'de',
     },
+    testProperty: 'foo',
 };
 
 /**

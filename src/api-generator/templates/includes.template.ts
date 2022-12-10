@@ -2,6 +2,7 @@
 import { ContinuousParameter, FmodEvent, FmodEventType, FmodPlayer, LabeledParameter, IFmodProject } from '../../index';
 import type { ILogger } from '../../api/i-logger';
 import { IFmodApi } from '../../ports/i-fmod-api';
+// CUSTOM_INCLUDES
 // end-template
 
 // Import all used classes in order to satisfy TypeScript

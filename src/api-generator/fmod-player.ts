@@ -4,6 +4,7 @@ import { ILogger } from '../api/i-logger';
 import { IRequireBank } from './ports/i-require-bank';
 import { FmodEvent } from './fmod-event';
 import { IFmodApi } from '../ports/i-fmod-api';
+import { IFmodProject } from './interfaces/fmod-interfaces';
 
 
 export interface FmodPlayerEvents {
@@ -18,6 +19,13 @@ interface LoadedBankInfo {
 }
 
 export abstract class FmodPlayer extends TypedEmitter<FmodPlayerEvents> implements IRequireBank {
+
+    /**
+     * Raw project data which was used to generate this player, if it was generated.
+     * Otherwise, this object is undefined.
+     */
+    public readonly rawProjectData: IFmodProject | undefined;
+
     protected readonly _banks: FmodBank;
     protected readonly _api: IFmodApi;
 

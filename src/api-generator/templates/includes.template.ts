@@ -1,6 +1,6 @@
 // begin-template
-import { ContinuousParameter, FmodEvent, FmodEventType, FmodPlayer, LabeledParameter } from '../../index';
-import { ILogger } from '../../api/i-logger';
+import { ContinuousParameter, FmodEvent, FmodEventType, FmodPlayer, LabeledParameter, IFmodProject } from '../../index';
+import type { ILogger } from '../../api/i-logger';
 import { IFmodApi } from '../../ports/i-fmod-api';
 // end-template
 
@@ -13,3 +13,4 @@ const fpl: FmodPlayer | undefined = undefined;
 const logger: ILogger | undefined = undefined;
 const iApi: IFmodApi | undefined = undefined;
 const x = FmodEventType.event;
+const foo: IFmodProject | undefined = undefined;

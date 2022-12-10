@@ -126,7 +126,11 @@ export class FmodCodegen {
             .concat( globalParamRegistration )
             .join( '\n' );
 
+        const eslintIgnores=' // eslint-disable-line quotes, object-curly-spacing';
+        const projectRawData = `public readonly rawProjectData: IFmodProject = ${JSON.stringify( this._data )} as IFmodProject;${eslintIgnores}`;
+
         return this.loadTemplate( 'main', names )
+            .replace( '// RAW_PROJECT_DATA', projectRawData )
             .replace( '// EVENT_DEF', eventDefinitions.join( '\n' ) )
             .replace( '// LOCALISE', localise )
             .replace( '// GLOBAL_PARAMS', globalParams )

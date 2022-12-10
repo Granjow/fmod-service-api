@@ -1,6 +1,6 @@
 {
   "name": "@geheimgang188/fmod-service-api",
-  "version": "2.9.1",
+  "version": "2.10.0",
   "description": "FMOD service API",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",

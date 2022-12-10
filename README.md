@@ -19,7 +19,7 @@ so your IDE should provide some support.
 
 ## Changelog
 
-* **2.10.0** (2022-12-10)
+* **2.10.1** (2022-12-10)
   * Added: When using the code generator, the raw data is now exposed in the generated player.
 * **2.9.1** (2022-09-27)
   * Changed: Minor code style issue (if global parameters are empty, a comment is inserted to prevent space-only line)

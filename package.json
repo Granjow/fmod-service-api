@@ -1,6 +1,6 @@
 {
   "name": "@geheimgang188/fmod-service-api",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "FMOD service API",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -33,7 +33,7 @@
     "camelcase": "^6.3.0",
     "semaphore-promise": "^1.4.1",
     "small-state-machine": "^3.1.0",
-    "zeromq": "^6.0.0-beta.16"
+    "zeromq": "^6.0.0-beta.6"
   },
   "devDependencies": {
     "@types/jest": "^29.2.4",

@@ -45,6 +45,10 @@ export class FmodEvent {
         return this._api;
     }
 
+    get eventType(): FmodEventType {
+        return this._eventType;
+    }
+
     async play(): Promise<void> {
         if ( this._eventType === FmodEventType.snapshot ) {
             throw new Error( `${this.id} is a snapshot and should be start()ed/stop()ped.` );

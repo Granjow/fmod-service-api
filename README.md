@@ -19,6 +19,8 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.11.0** (2022-12-30)
+  * Added: Stop all events which have been started with `start()` before. (This requires FMOD Service 1.2.0 or newer.)
 * **2.10.1** (2022-12-10)
   * Added: When using the code generator, the raw data is now exposed in the generated player.
 * **2.9.1** (2022-09-27)

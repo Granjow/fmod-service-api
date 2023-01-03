@@ -209,6 +209,10 @@ export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProjec
         }
     }
 
+    stopAllEvents(): Promise<void> {
+        return this._api.stopStartedEvents();
+    }
+
     /**
      * Retrieves an event by its name (event path).
      */

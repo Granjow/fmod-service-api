@@ -42,7 +42,6 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     private readonly _logger: ILogger | undefined;
     private readonly _sm: SmallStateMachine<ConnectionState, Events>;
-    private readonly _runningEvents: Set<string> = new Set();
     private readonly _socketSempahore: Semaphore;
 
     constructor( address: string, args?: FmodZeromqApiArgs ) {
@@ -96,7 +95,6 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
      */
     async start( event: string ): Promise<void> {
         const command = `start-event:${event}`;
-        this._runningEvents.add( event );
         await this.sendCommand( command );
     }
 
@@ -106,7 +104,11 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
      */
     async stop( event: string ): Promise<void> {
         const command = `stop-event:${event}`;
-        this._runningEvents.delete( event );
+        await this.sendCommand( command );
+    }
+
+    async stopStartedEvents(): Promise<void> {
+        const command = 'stop-started-events';
         await this.sendCommand( command );
     }
 

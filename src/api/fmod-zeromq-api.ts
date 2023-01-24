@@ -6,6 +6,7 @@ import { SmallStateMachine } from 'small-state-machine';
 import Semaphore from 'semaphore-promise';
 import { ILogger } from './i-logger';
 import { ConnectionEvents, IConnect, IConnectEvents } from '../ports/i-connect';
+import { IConfigureLogging } from '../ports/i-configure-logging';
 
 
 export enum ConnectionState {
@@ -28,7 +29,7 @@ export interface FmodZeromqApiArgs {
     socketStatusIntervalMillis?: number;
 }
 
-export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents {
+export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents, IConfigureLogging {
 
     private readonly _socketStatusInterval: number;
     private _socketStatusPoll: Timer | undefined;
@@ -44,10 +45,14 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     private readonly _sm: SmallStateMachine<ConnectionState, Events>;
     private readonly _socketSempahore: Semaphore;
 
+    private _verboseLogging = false;
+
     constructor( address: string, args?: FmodZeromqApiArgs ) {
         super();
 
         this._logger = args?.logger;
+        this._verboseLogging = args?.logger !== undefined;
+
         this._zmqAddress = address;
         this._heartbeatInterval = args?.heartbeatIntervalMillis ?? 4000;
         this._socketStatusInterval = args?.socketStatusIntervalMillis ?? 4000;
@@ -79,6 +84,14 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     get connectionState(): ConnectionState {
         return this._sm.currentState;
+    }
+
+    get verboseLogging(): boolean {
+        return this._verboseLogging;
+    }
+
+    set verboseLogging( verbose: boolean ) {
+        this._verboseLogging = verbose;
     }
 
     connect(): void {
@@ -170,7 +183,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         this._logger?.debug( `ZMQ socket connecting to ${this._zmqAddress}` );
         this._socket.connect( this._zmqAddress );
 
-        this._logger?.debug( `Setting up heartbeat and status polling` );
+        this._verboseLogging && this._logger?.debug( `Setting up heartbeat and status polling` );
 
         // Regularly send message to the API to check if it is still online
         if ( this._heartbeatPoll === undefined ) {
@@ -230,7 +243,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         let msg = '';
 
         const release = await this._socketSempahore.acquire();
-        this._logger?.trace( `Sending: ${command}` );
+        this._verboseLogging && this._logger?.trace( `Sending: ${command}` );
         try {
             /*
             // Setting the sending timeout may be helpful. Needs further examination.
@@ -243,7 +256,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
             const sendPromise = this._socket.send( command );
 
             const [ response ] = await this._socket.receive();
-            this._logger?.trace( `Received: ${response}` );
+            this._verboseLogging && this._logger?.trace( `Received: ${response}` );
 
             msg = response.toString( 'utf-8' );
             if ( msg.startsWith( 'Error:' ) ) {
@@ -252,7 +265,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         } finally {
             release();
         }
-        this._logger?.trace( `Done sending ${command}` );
+        this._verboseLogging && this._logger?.trace( `Done sending ${command}` );
 
         return msg;
     }

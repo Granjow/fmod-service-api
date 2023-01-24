@@ -90,9 +90,11 @@ export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProjec
         this._logger?.info( 'Connecting to FMOD and loading banks' );
         this._api.connect();
 
-        this._api.once( 'connect', () => this.initBanks() );
+        this._api.once( 'connect', () => this.initBanks().catch( err => this._logger?.error( `Error initialising banks: ${err?.message ?? err}` ) ) );
 
-        this._api.on( 'reconnect', () => this.handleReconnect() );
+        this._api.on( 'reconnect', () => this.handleReconnect().catch( err => this._logger?.error( `Error trying to reconnect: ${err?.message ?? err}` ) ) );
+
+        this._api.on( 'disconnect', () => this.handleDisconnect() );
     }
 
     /**
@@ -287,6 +289,10 @@ export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProjec
         this._logger?.warn( `Reconnected. Resetting loaded banks and initialising banks again.` );
         this._currentLanguage = undefined;
         await this.initBanks();
+    }
+
+    private handleDisconnect(): void {
+        this._logger?.warn( 'FMOD API disconnected.' );
     }
 
     private isLocalisedBank( bankName: string ): boolean {

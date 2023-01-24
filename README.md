@@ -19,6 +19,9 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.12.0** (2023-01-24)
+  * Added: Logging can be set to non-verbose with `FmodZeromqApi.verboseLogging`
+  * Changed: In case a connect/reconnect fails, an error is logged to prevent uncaught exceptions.
 * **2.11.0** (2022-12-30)
   * Added: Stop all events which have been started with `start()` before. (This requires FMOD Service 1.2.0 or newer.)
 * **2.10.1** (2022-12-10)

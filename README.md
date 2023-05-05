@@ -19,6 +19,8 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* **2.13.0** (2023-05-05)
+  * Changed: `FmodPlayer.resetAllParameters()` also resets global parameters
 * **2.12.0** (2023-01-24)
   * Added: Logging can be set to non-verbose with `FmodZeromqApi.verboseLogging`
   * Changed: In case a connect/reconnect fails, an error is logged to prevent uncaught exceptions.

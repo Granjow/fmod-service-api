@@ -209,6 +209,9 @@ export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProjec
                 await param.setDefaultValue();
             }
         }
+        for ( const param of this.allGlobalParameters ) {
+            await param.setDefaultValue();
+        }
     }
 
     stopAllEvents(): Promise<void> {

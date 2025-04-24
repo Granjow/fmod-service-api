@@ -1,4 +1,3 @@
-import Timer = NodeJS.Timer;
 import { IControlFmod } from '../ports/i-control-fmod';
 import * as zmq from 'zeromq';
 import { TypedEmitter } from 'tiny-typed-emitter';
@@ -32,10 +31,10 @@ export interface FmodZeromqApiArgs {
 export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents, IConfigureLogging {
 
     private readonly _socketStatusInterval: number;
-    private _socketStatusPoll: Timer | undefined;
+    private _socketStatusPoll: NodeJS.Timeout | undefined;
 
     private readonly _heartbeatInterval: number;
-    private _heartbeatPoll: Timer | undefined;
+    private _heartbeatPoll: NodeJS.Timeout | undefined;
     private _lastId: string | undefined;
 
     private _socket: zmq.Request | undefined;

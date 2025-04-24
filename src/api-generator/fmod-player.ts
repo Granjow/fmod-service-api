@@ -214,6 +214,9 @@ export abstract class FmodPlayer<TProjectData extends IFmodProject = IFmodProjec
         }
     }
 
+    /**
+     * Stops **all** running events, including snapshots.
+     */
     stopAllEvents(): Promise<void> {
         return this._api.stopStartedEvents();
     }

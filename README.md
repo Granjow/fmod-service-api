@@ -19,6 +19,9 @@ so your IDE should provide some support.
 
 ## Changelog
 
+* Upcoming
+* **2.14.0** (2025-06-05)
+  * Changed: Dependencies updated
 * **2.13.0** (2023-05-05)
   * Changed: `FmodPlayer.resetAllParameters()` also resets global parameters
 * **2.12.0** (2023-01-24)

@@ -31,13 +31,13 @@
   "license": "ISC",
   "dependencies": {
     "camelcase": "^6.3.0",
-    "semaphore-promise": "1.4.2",
-    "small-state-machine": "4.0.0",
+    "semaphore-promise": "1.4.3",
+    "small-state-machine": "4.2.1",
     "zeromq": "6.0.0-beta.6"
   },
   "devDependencies": {
     "@types/jest": "^29.2.4",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.19.17",
     "@types/zeromq": "^5.2.1",
     "@typescript-eslint/eslint-plugin": "^5.46.0",
     "@typescript-eslint/parser": "^5.46.0",
@@ -45,7 +45,7 @@
     "jest": "^29.7.0",
     "pino": "^8.21.0",
     "tiny-typed-emitter": "^2.1.0",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   },
   "jest": {
     "clearMocks": true,

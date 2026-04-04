@@ -57,9 +57,21 @@ export class FmodEvent {
         return this.api.play( this.id );
     }
 
+    /**
+     * Plays an event that contains a programmer instrument
+     * @param voiceKey Key to pass to the programmer instrument
+     */
     async playVoice( voiceKey: string ): Promise<void> {
         await this.ensureBankLoaded();
         return this.api.playVoice( this.id, voiceKey );
+    }
+
+    /**
+     * @param voiceKey Key used for the programmer instrument
+     * @returns Number of stopped voices
+     */
+    async stopVoice( voiceKey: string ): Promise<number> {
+        return this.api.stopVoice( this.id, voiceKey );
     }
 
     async start(): Promise<void> {

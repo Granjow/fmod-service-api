@@ -21,6 +21,11 @@ export interface IControlFmod {
      */
     playVoice( eventId: string, key: string ): Promise<void>;
 
+    /**
+     * Stops all running instances of this eventId/key combination
+     */
+    stopVoice( eventId: string, key: string ): Promise<number>;
+
     setParameter( eventId: string, paramName: string, value: number ): Promise<void>;
 
     isPlaying( eventId: string ): Promise<boolean>;

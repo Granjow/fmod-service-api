@@ -22,6 +22,12 @@ enum Events {
     disconnected = 'disconnected',
 }
 
+interface EventInstanceData {
+    uniqueEventId: string;
+    /** Used for cleanup */
+    tAdded: number;
+}
+
 export interface FmodZeromqApiArgs {
     logger?: ILogger;
     heartbeatIntervalMillis?: number;
@@ -29,6 +35,8 @@ export interface FmodZeromqApiArgs {
 }
 
 export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents, IConfigureLogging {
+
+    private static toEventMapId = ( eventId: string, key: string ): string => `${eventId};;${key}`;
 
     private readonly _socketStatusInterval: number;
     private _socketStatusPoll: NodeJS.Timeout | undefined;
@@ -43,6 +51,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     private readonly _logger: ILogger | undefined;
     private readonly _sm: SmallStateMachine<ConnectionState, Events>;
     private readonly _socketSempahore: Semaphore;
+
+    private readonly _singleShotEventIds = new Map<string, EventInstanceData[]>();
 
     private _verboseLogging = false;
 
@@ -150,7 +160,39 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     async playVoice( eventId: string, key: string ): Promise<void> {
         const command = `play-voice:${eventId};${key}`;
-        await this.sendCommand( command );
+        const result = await this.sendCommand( command );
+        const uniqueEventId = result.split( ' ' )[ 1 ];
+        if ( uniqueEventId !== undefined ) {
+            console.log( `Event ID received: ${uniqueEventId}` );
+            const mapId = FmodZeromqApi.toEventMapId( eventId, key );
+            const eventList = this._singleShotEventIds.get( mapId ) ?? [];
+            eventList.push( {
+                tAdded: Date.now(),
+                uniqueEventId,
+            } );
+            this._singleShotEventIds.set( mapId, eventList );
+        }
+
+        this.cleanupOldEventIds();
+    }
+
+    async stopVoice( eventId: string, key: string ): Promise<number> {
+        const mapId = FmodZeromqApi.toEventMapId( eventId, key );
+        const entries = this._singleShotEventIds.get( mapId );
+        if ( entries === undefined ) {
+            return 0;
+        }
+        let stoppedCount = 0;
+        for ( const entry of entries ) {
+            const command = `stop-event:${entry.uniqueEventId}`;
+            const result = await this.sendCommand( command );
+            if ( result.startsWith( 'OK' ) ) {
+                stoppedCount++;
+            }
+        }
+        entries.length = 0;
+        this.printSingleShotLength();
+        return stoppedCount;
     }
 
     isPlaying( eventId: string ): Promise<boolean> {
@@ -166,6 +208,27 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
             .filter( el => el.length > 0 );
     }
 
+
+    private cleanupOldEventIds(): void {
+        const now = Date.now();
+        const minutes = 60 * 1000;
+        for ( const [ key, val ] of this._singleShotEventIds.entries() ) {
+            const cleaned = val.filter( el => ( now - el.tAdded ) < 10 * minutes );
+            const delta = val.length - cleaned.length;
+            if ( delta > 0 ) {
+                this._singleShotEventIds.set( key, cleaned );
+                this._verboseLogging && this._logger?.debug( `Old event IDs cleaned up: ${delta} removed` );
+            }
+        }
+        this.printSingleShotLength();
+    }
+
+    private printSingleShotLength(): void {
+        const totalIds = Array.from( this._singleShotEventIds.values() )
+            .map( el => el.length )
+            .reduce( ( acc, cur ) => acc + cur, 0 );
+        this._verboseLogging && this._logger?.debug( `Single-shot event list contains ${totalIds} unique IDs` );
+    }
 
     private doConnect(): void {
         if ( this._socket !== undefined ) throw new Error( 'Socket already exists!' );

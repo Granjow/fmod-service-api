@@ -30,15 +30,15 @@
   "author": "Simon A. Eugster <simon.eu@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "camelcase": "^6.3.0",
+    "camelcase": "6.3.0",
     "semaphore-promise": "1.4.3",
     "small-state-machine": "4.2.1",
-    "zeromq": "6.0.0-beta.6"
+    "zeromq": "6.5.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.4",
     "@types/node": "^22.19.17",
-    "@types/zeromq": "^5.2.1",
+    "@types/zeromq": "6.0.0",
     "@typescript-eslint/eslint-plugin": "^5.46.0",
     "@typescript-eslint/parser": "^5.46.0",
     "eslint": "^8.29.0",

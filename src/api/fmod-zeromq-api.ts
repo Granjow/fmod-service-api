@@ -36,6 +36,14 @@ export interface FmodZeromqApiArgs {
 
 export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents, IConfigureLogging {
 
+    static getEventIdFromResponse( response: string ): string | undefined {
+        const spacePos = response.indexOf( ' ' );
+        if ( spacePos === -1 ) {
+            return undefined;
+        }
+        return response.substring( spacePos + 1 );
+    }
+
     private static toEventMapId = ( eventId: string, key: string ): string => `${eventId};;${key}`;
 
     private readonly _socketStatusInterval: number;
@@ -81,6 +89,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         this._sm.configure( ConnectionState.Connected )
             .onEntry( () => this.onConnected() )
             .permit( Events.disconnected, ConnectionState.Disconnected )
+            .permit( Events.disconnect, ConnectionState.Disconnecting )
             .ignore( Events.connect )
             .ignore( Events.connected );
         this._sm.configure( ConnectionState.Disconnecting )
@@ -108,7 +117,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     }
 
     disconnect(): void {
-        this._sm.fire( Events.disconnected );
+        this._sm.fire( Events.disconnect );
     }
 
     /**
@@ -161,7 +170,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     async playVoice( eventId: string, key: string ): Promise<void> {
         const command = `play-voice:${eventId};${key}`;
         const result = await this.sendCommand( command );
-        const uniqueEventId = result.split( ' ' )[ 1 ];
+        const uniqueEventId = FmodZeromqApi.getEventIdFromResponse( result );
+        this._logger?.trace( `Answer from play-voice: ${result}; extracted ID: ${uniqueEventId}` );
         if ( uniqueEventId !== undefined ) {
             console.log( `Event ID received: ${uniqueEventId}` );
             const mapId = FmodZeromqApi.toEventMapId( eventId, key );
@@ -267,7 +277,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
                     // closed → no connection
                     // writable → all fine. This is how it should be after sending and receiving a message.
                     // readable → only when we did not read the response, but the API should always read after writing
-                    const writableStatus = this._socket.writable;
+                    // undefined (because disconnected) → no connection
+                    const writableStatus = this._socket?.writable ?? false;
                     if ( writableStatus !== lastWritableStatus ) {
                         lastWritableStatus = writableStatus;
                         this._sm.fire( writableStatus ? Events.connected : Events.disconnected );
@@ -296,7 +307,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
             clearInterval( this._socketStatusPoll );
             this._socketStatusPoll = undefined;
         }
-        this._sm.fire( Events.disconnected );
+        const fireDisconnect = (): void => this._sm.fire( Events.disconnected );
+        setImmediate( fireDisconnect );
     }
 
     private async sendCommand( command: string ): Promise<string> {

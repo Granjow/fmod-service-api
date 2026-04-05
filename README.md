@@ -23,6 +23,8 @@ so your IDE should provide some support.
   * Added: `FmodEvent.stopVoice()` can stop running voice events
     * **Migration:** New features require new FMOD service.
   * Changed: `FmodPlayer.stopAllEvents()` also stops voice events
+  * Fixed: `FmodZeromqApi.disconnect()` now disconnects properly. Previously, the heartbeat was not stopped,
+    causing the API to reconnect immediately.
 * **2.14.0** (2025-06-05)
   * Changed: Dependencies updated
 * **2.13.0** (2023-05-05)

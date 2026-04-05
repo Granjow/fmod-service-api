@@ -23,6 +23,8 @@ describe( 'FMOD ZeroMQ API', () => {
                     } );
                     fza.on( 'connect', () => {
 
+                        logger.debug( 'Connected' );
+
                         fza.on( 'disconnect', done );
 
                         new Promise( resolve => setTimeout( resolve, 10 ) )
@@ -101,5 +103,23 @@ describe( 'FMOD ZeroMQ API', () => {
             }, 200 );
         } );
 
+    } );
+
+    describe( 'Response Parser', () => {
+        it( 'returns undefined when no event ID given', () => {
+            const response = 'OK';
+            const id = FmodZeromqApi.getEventIdFromResponse( response );
+            expect( id ).not.toBeDefined();
+        } );
+        it( 'returns event ID', () => {
+            const response = 'OK myid';
+            const id = FmodZeromqApi.getEventIdFromResponse( response );
+            expect( id ).toBe( 'myid' );
+        } );
+        it( 'returns event ID with spaces', () => {
+            const response = 'OK my long id';
+            const id = FmodZeromqApi.getEventIdFromResponse( response );
+            expect( id ).toBe( 'my long id' );
+        } );
     } );
 } );

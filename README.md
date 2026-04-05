@@ -20,6 +20,7 @@ so your IDE should provide some support.
 ## Changelog
 
 * Upcoming
+* **2.15.0** (2026-04-05)
   * Added: `FmodEvent.stopVoice()` can stop running voice events
     * **Migration:** New features require new FMOD service.
   * Changed: `FmodPlayer.stopAllEvents()` also stops voice events

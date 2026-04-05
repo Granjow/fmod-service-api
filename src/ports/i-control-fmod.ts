@@ -7,7 +7,7 @@ export interface IControlFmod {
 
     start( eventId: string ): Promise<void>;
 
-    stop( eventId: string ): Promise<void>;
+    stop( eventId: string ): Promise<number>;
 
     /**
      * Stop all events that have been started with start().

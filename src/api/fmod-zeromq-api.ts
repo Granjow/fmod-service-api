@@ -133,9 +133,19 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
      * Stop a running event
      * @param event
      */
-    async stop( event: string ): Promise<void> {
+    async stop( event: string ): Promise<number> {
         const command = `stop-event:${event}`;
-        await this.sendCommand( command );
+        let stoppedEvents = 0;
+        stoppedEvents += await this.stopSingleShotEvents( event );
+        try {
+            await this.sendCommand( command );
+            stoppedEvents++;
+        } catch ( err: any ) {
+            if ( stoppedEvents === 0 ) {
+                this._logger?.warn( `Failed stopping event ${event}: ${err?.message ?? err}` );
+            }
+        }
+        return stoppedEvents;
     }
 
     async stopStartedEvents(): Promise<void> {
@@ -149,7 +159,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
      */
     async play( event: string ): Promise<void> {
         const command = `play-event:${event}`;
-        await this.sendCommand( command );
+        const result = await this.sendCommand( command );
+        this.addSingleShotId( event, command, result );
     }
 
     async loadBank( bankName: string ): Promise<void> {
@@ -170,25 +181,31 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     async playVoice( eventId: string, key: string ): Promise<void> {
         const command = `play-voice:${eventId};${key}`;
         const result = await this.sendCommand( command );
-        const uniqueEventId = FmodZeromqApi.getEventIdFromResponse( result );
-        this._logger?.trace( `Answer from play-voice: ${result}; extracted ID: ${uniqueEventId}` );
-        if ( uniqueEventId !== undefined ) {
-            console.log( `Event ID received: ${uniqueEventId}` );
-            const mapId = FmodZeromqApi.toEventMapId( eventId, key );
-            const eventList = this._singleShotEventIds.get( mapId ) ?? [];
-            eventList.push( {
-                tAdded: Date.now(),
-                uniqueEventId,
-            } );
-            this._singleShotEventIds.set( mapId, eventList );
-        }
-
-        this.cleanupOldEventIds();
+        const mapId = FmodZeromqApi.toEventMapId( eventId, key );
+        this.addSingleShotId( mapId, command, result );
     }
 
     async stopVoice( eventId: string, key: string ): Promise<number> {
         const mapId = FmodZeromqApi.toEventMapId( eventId, key );
-        const entries = this._singleShotEventIds.get( mapId );
+        return this.stopSingleShotEvents( mapId );
+    }
+
+    isPlaying( eventId: string ): Promise<boolean> {
+        throw new Error( 'Method not implemented.' );
+    }
+
+    async listLoadedBankPaths(): Promise<string[]> {
+        const command = 'list-bank-paths';
+        const list = await this.sendCommand( command );
+        return list
+            .split( ';' )
+            .map( el => el.replace( /^bank:\//, '' ) )
+            .filter( el => el.length > 0 );
+    }
+
+
+    private async stopSingleShotEvents( eventIdentifier: string ): Promise<number> {
+        const entries = this._singleShotEventIds.get( eventIdentifier );
         if ( entries === undefined ) {
             return 0;
         }
@@ -205,19 +222,21 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         return stoppedCount;
     }
 
-    isPlaying( eventId: string ): Promise<boolean> {
-        throw new Error( 'Method not implemented.' );
-    }
+    private addSingleShotId( eventIdentifier: string, fmodAction: string, fmodResponse: string ): void {
+        const uniqueEventId = FmodZeromqApi.getEventIdFromResponse( fmodResponse );
+        this._verboseLogging && this._logger?.trace( `Answer from ${fmodAction}: ${fmodResponse}; extracted ID: ${uniqueEventId}` );
+        if ( uniqueEventId !== undefined ) {
+            this._verboseLogging && this._logger?.trace( `Event ID received: ${uniqueEventId}` );
+            const eventList = this._singleShotEventIds.get( eventIdentifier ) ?? [];
+            eventList.push( {
+                tAdded: Date.now(),
+                uniqueEventId,
+            } );
+            this._singleShotEventIds.set( eventIdentifier, eventList );
+        }
 
-    async listLoadedBankPaths(): Promise<string[]> {
-        const command = 'list-bank-paths';
-        const list = await this.sendCommand( command );
-        return list
-            .split( ';' )
-            .map( el => el.replace( /^bank:\//, '' ) )
-            .filter( el => el.length > 0 );
+        this.cleanupOldEventIds();
     }
-
 
     private cleanupOldEventIds(): void {
         const now = Date.now();

@@ -80,7 +80,10 @@ export class FmodEvent {
         return this.api.start( this.id );
     }
 
-    stop(): Promise<void> {
+    /**
+     * @returns Number of stopped instances
+     */
+    stop(): Promise<number> {
         return this.api.stop( this.id );
     }
 

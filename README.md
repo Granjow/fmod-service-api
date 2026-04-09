@@ -20,6 +20,8 @@ so your IDE should provide some support.
 ## Changelog
 
 * Upcoming
+* **2.15.1** (2026-04-09)
+  * Changed: `zeromq` downgraded to `6.0.0-beta.6` again because `6.5.0` is not `armhf` compatible
 * **2.15.0** (2026-04-05)
   * Added: `FmodEvent.stopVoice()` can stop running voice events
     * **Migration:** New features require new FMOD service.

@@ -3,9 +3,11 @@ import * as zmq from 'zeromq';
 import { TypedEmitter } from 'tiny-typed-emitter';
 import { SmallStateMachine } from 'small-state-machine';
 import Semaphore from 'semaphore-promise';
+import { EventEmitter } from 'events';
 import { ILogger } from './i-logger';
 import { ConnectionEvents, IConnect, IConnectEvents } from '../ports/i-connect';
 import { IConfigureLogging } from '../ports/i-configure-logging';
+import { MarkerData, parseMarkerMessage } from './marker-data';
 
 
 export enum ConnectionState {
@@ -32,6 +34,8 @@ export interface FmodZeromqApiArgs {
     logger?: ILogger;
     heartbeatIntervalMillis?: number;
     socketStatusIntervalMillis?: number;
+    /** Address for the pub/sub subscriber socket. Defaults to main address port + 1. */
+    subscriberAddress?: string;
 }
 
 export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements IControlFmod, IConnect, IConnectEvents, IConfigureLogging {
@@ -57,12 +61,17 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     private readonly _zmqAddress: string;
 
     private readonly _logger: ILogger | undefined;
+    private readonly _events = new EventEmitter();
     private readonly _sm: SmallStateMachine<ConnectionState, Events>;
     private readonly _socketSempahore: Semaphore;
 
     private readonly _singleShotEventIds = new Map<string, EventInstanceData[]>();
 
     private _verboseLogging = false;
+
+    private readonly _subscriberAddress: string;
+    private _subSocket: zmq.Subscriber | undefined;
+    private _subRunning = false;
 
     constructor( address: string, args?: FmodZeromqApiArgs ) {
         super();
@@ -74,6 +83,16 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         this._heartbeatInterval = args?.heartbeatIntervalMillis ?? 4000;
         this._socketStatusInterval = args?.socketStatusIntervalMillis ?? 4000;
         this._socketSempahore = new Semaphore( 1 );
+
+        if ( args?.subscriberAddress ) {
+            this._subscriberAddress = args.subscriberAddress;
+        } else {
+            // Derive subscriber address from main address by incrementing the port
+            const match = address.match( /^(.*:)(\d+)$/ );
+            this._subscriberAddress = match
+                ? `${match[ 1 ]}${parseInt( match[ 2 ], 10 ) + 1}`
+                : address.replace( /:\d+$/, ':3001' );
+        }
 
         this._sm = new SmallStateMachine<ConnectionState, Events>( ConnectionState.Disconnected );
         this._sm.configure( ConnectionState.Disconnected )
@@ -121,8 +140,21 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
     }
 
     /**
+     * Register a callback for marker events from FMOD.
+     */
+    onMarker( cb: ( data: MarkerData ) => void ): void {
+        this._events.on( 'marker', cb );
+    }
+
+    /**
+     * Unregister a marker event callback.
+     */
+    offMarker( cb: ( data: MarkerData ) => void ): void {
+        this._events.off( 'marker', cb );
+    }
+
+    /**
      * Start an event; it can be stopped again
-     * @param event
      */
     async start( event: string ): Promise<void> {
         const command = `start-event:${event}`;
@@ -131,7 +163,6 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     /**
      * Stop a running event
-     * @param event
      */
     async stop( event: string ): Promise<number> {
         const command = `stop-event:${event}`;
@@ -274,6 +305,8 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
         this._logger?.debug( `ZMQ socket connecting to ${this._zmqAddress}` );
         this._socket.connect( this._zmqAddress );
 
+        this.connectSubscriber();
+
         this._verboseLogging && this._logger?.debug( `Setting up heartbeat and status polling` );
 
         // Regularly send message to the API to check if it is still online
@@ -314,6 +347,7 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     private doDisconnect(): void {
         this._logger?.debug( 'Disconnecting …' );
+        this.disconnectSubscriber();
         if ( this._socket !== undefined ) {
             this._socket.disconnect( this._zmqAddress );
             this._socket = undefined;
@@ -398,6 +432,50 @@ export class FmodZeromqApi extends TypedEmitter<ConnectionEvents> implements ICo
 
     private onDisconnected(): void {
         process.nextTick( () => this.emit( 'disconnect' ) );
+    }
+
+    private connectSubscriber(): void {
+        if ( this._subSocket !== undefined ) return;
+
+        this._subSocket = new zmq.Subscriber();
+        this._subSocket.connect( this._subscriberAddress );
+        this._subSocket.subscribe( '' );
+        this._subRunning = true;
+        this._logger?.debug( `ZMQ subscriber connecting to ${this._subscriberAddress}` );
+
+        this.runSubscriberLoop()
+            .catch( ( err: any ) => this._logger?.error( `Error in subscriber loop: ${err?.message ?? err}` ) );
+    }
+
+    private disconnectSubscriber(): void {
+        this._subRunning = false;
+        if ( this._subSocket !== undefined ) {
+            this._subSocket.close();
+            this._subSocket = undefined;
+        }
+    }
+
+    private async runSubscriberLoop(): Promise<void> {
+        const socket = this._subSocket;
+        if ( !socket ) return;
+
+        try {
+            for await ( const [ msg ] of socket ) {
+                if ( !this._subRunning ) break;
+
+                const message = msg.toString( 'utf-8' );
+                this._verboseLogging && this._logger?.trace( `Sub received: ${message}` );
+
+                const parsed = parseMarkerMessage( message );
+                if ( parsed ) {
+                    this._events.emit( 'marker', parsed );
+                }
+            }
+        } catch ( err: any ) {
+            if ( this._subRunning ) {
+                this._logger?.warn( `Subscriber loop error: ${err?.message ?? err}` );
+            }
+        }
     }
 
 }

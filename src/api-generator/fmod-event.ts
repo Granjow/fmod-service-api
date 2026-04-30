@@ -3,6 +3,7 @@ import { FmodParameter } from './fmod-types';
 import { IFmodApi } from '../ports/i-fmod-api';
 import { ILogger } from '../api/i-logger';
 import { FmodEventType } from './interfaces/fmod-event-type';
+import { MarkerData } from '../api/marker-data';
 
 export class FmodEvent {
     public readonly id: string;
@@ -15,6 +16,7 @@ export class FmodEvent {
     private _api: IFmodApi | undefined;
     private _bankLoader: IRequireBank | undefined;
     private readonly _eventType: FmodEventType;
+    private readonly _markerListeners = new Map<( data: MarkerData ) => void, ( data: MarkerData ) => void>();
 
     // Add parameters which should be initialised here
     public readonly params: FmodParameter[] = [];
@@ -85,6 +87,31 @@ export class FmodEvent {
      */
     stop(): Promise<number> {
         return this.api.stop( this.id );
+    }
+
+    /**
+     * Subscribe to marker events for this specific FMOD event.
+     * Only markers whose event path matches this event's ID will be forwarded.
+     */
+    onMarker( cb: ( data: MarkerData ) => void ): void {
+        const filtered = ( data: MarkerData ): void => {
+            if ( data.event === this.id ) {
+                cb( data );
+            }
+        };
+        this._markerListeners.set( cb, filtered );
+        this.api.onMarker( filtered );
+    }
+
+    /**
+     * Unsubscribe a marker event callback.
+     */
+    offMarker( cb: ( data: MarkerData ) => void ): void {
+        const filtered = this._markerListeners.get( cb );
+        if ( filtered ) {
+            this.api.offMarker( filtered );
+            this._markerListeners.delete( cb );
+        }
     }
 
     private async ensureBankLoaded(): Promise<void> {

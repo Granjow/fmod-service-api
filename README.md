@@ -20,6 +20,10 @@ so your IDE should provide some support.
 ## Changelog
 
 * Upcoming
+* **3.0.0** – requires FMOD service v2.0.0
+  * Added: `FmodEvent.onMarker(cb)` subscribes to marker events. These are triggered when playback runs over e.g.
+    a destination marker/region and can be used to synchronise external events with sound events.
+    * Generated APIs need to be re-generated.
 * **2.15.1** (2026-04-09)
   * Changed: `zeromq` downgraded to `6.0.0-beta.6` again because `6.5.0` is not `armhf` compatible
 * **2.15.0** (2026-04-05)

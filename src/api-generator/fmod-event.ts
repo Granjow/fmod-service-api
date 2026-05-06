@@ -91,7 +91,9 @@ export class FmodEvent {
 
     /**
      * Subscribe to marker events for this specific FMOD event.
-     * Only markers whose event path matches this event's ID will be forwarded.
+     * Marker events occur when playback in FMOD runs over e.g. a destination marker.
+     *
+     * Only markers whose event path matches this event’s ID will be forwarded.
      */
     onMarker( cb: ( data: MarkerData ) => void ): void {
         const filtered = ( data: MarkerData ): void => {
